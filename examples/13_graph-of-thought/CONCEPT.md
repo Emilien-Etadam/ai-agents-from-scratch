@@ -1,113 +1,113 @@
-## Graph of Thought: Motivation analysis of a person
+## Graph of Thought : Analyse de motivation d'une personne
 
-Graph of Thought keeps multiple reasoning strands alive and combines them.
-Unlike Tree of Thought, weaker branches are not automatically discarded.
+Le Graph of Thought maintient multiple strands de raisonnement vivants et les combine.
+Contrairement au Tree of Thought, les branches plus faibles ne sont pas automatiquement éliminées.
 
 ---
 
-### Visual graph shape
+### Forme visuelle du graphe
 
 ```text
-                    [root: behavior]
+                    [root: comportement]
                    /    |      |    \
-             [n2]    [n3]   [n4]   [n5]      <- 4 hypotheses (branch)
-          Avoidance Burnout Growth Pressure
-             Sc:6     Sc:9    Sc:7   Sc:4
-                \      / \            |
-                 \    /   \           |
-              [n6:Contrast]  [n7:Contrast]    <- Burnout vs Avoidance / Burnout vs Pressure
-              (n3 vs n2)     (n3 vs n5)
-                  |    \         |
-                  |   [n8:Refined]  [n9:Refined]  <- weak hypothesis rescued and improved
-                  |    (n5+n3)      (n4+n6)
-                  |        \       /
-              [n10:Synthesis1]  [n11:Synthesis2] <- partial syntheses
-              (n3,n2,n6)        (n8,n9,n7)
-                    \              /
-                   [n12:CONCLUSION]            <- all strands merged
-                  (n10,n11,n6,n7,n8)
+             [n2]    [n3]   [n4]   [n5]      <- 4 hypothèses (branch)
+          Évitem. Burnout Croissance Pression
+          Sc:6     Sc:9    Sc:7   Sc:4
+            \      / \            |
+             \    /   \           |
+          [n6:Contrast]  [n7:Contrast]    <- Burnout vs Évitem. / Burnout vs Pression
+          (n3 vs n2)     (n3 vs n5)
+             |    \         |
+             |   [n8:Refined]  [n9:Refined]  <- hypothèse faible sauvée et améliorée
+             |    (n5+n3)      (n4+n6)
+             |        \       /
+          [n10:Synthesis1]  [n11:Synthesis2] <- synthèses partielles
+          (n3,n2,n6)        (n8,n9,n7)
+              \              /
+           [n12:CONCLUSION]            <- tous les strands fusionnés
+          (n10,n11,n6,n7,n8)
 ```
 
 ---
 
-### Why GoT gives a different class of answer
+### Pourquoi le GoT donne une classe différente de réponse
 
-Tree of Thought often picks one winner and drops alternatives.
-Graph of Thought does the opposite: it reuses alternatives through graph operations.
+Le Tree of Thought choisit souvent un winner et jette les alternatives.
+Le Graph of Thought fait le contraire : il réutilise les alternatives à travers les opérations de graphe.
 
-In this example:
+Dans cet exemple :
 
-- **Branch:** Build four competing hypotheses.
-- **Score:** Rank them, but keep all in the graph.
-- **Contrast:** Turn disagreement into a new diagnostic signal.
-- **Refine:** Improve weak branches using strong branches.
-- **Aggregate:** Merge multiple sources into syntheses.
-- **Conclude:** Use all strands for a final integrated view.
+- **Branch :** Construire quatre hypothèses concurrentes.
+- **Score :** Les ranger, mais les garder toutes dans le graphe.
+- **Contrast :** Transformer le désaccord en un nouveau signal diagnostique.
+- **Refine :** Améliorer les branches faibles en utilisant les branches fortes.
+- **Aggregate :** Fusionner multiple sources en synthèses.
+- **Conclude :** Utiliser tous les strands pour une vue finale intégrée.
 
 ---
 
-### GoT operations and what they unlock
+### Opérations GoT et ce qu'elles débloquent
 
-| Operation | What it reveals in this example |
+| Opération | Ce qu'elle révèle dans cet exemple |
 |---|---|
-| Contrast | Productive tension between hypotheses becomes explicit evidence |
-| Refine | Weak hypotheses are rescued instead of discarded |
-| Aggregate | Different strands are synthesized into richer intermediate views |
-| Conclude | Final answer includes contradictions and rescued insights |
+| Contrast | La tension productive entre hypothèses devient une preuve explicite |
+| Refine | Les hypothèses faibles sont sauvées au lieu d'être éliminées |
+| Aggregate | Différents strands sont synthétisés en vues intermédiaires plus riches |
+| Conclude | La réponse finale inclut contradictions et insights sauvés |
 
 ---
 
-### Core takeaway
+### Takeaway Fondamental
 
-Tree of Thought asks: **Which branch wins?**  
-Graph of Thought asks: **How can multiple branches interact to produce a better final model?**
+Le Tree of Thought demande : **Quelle branche gagne ?**
+Le Graph of Thought demande : **Comment multiple branches peuvent interagir pour produire un model final meilleur ?**
 
-That is why GoT can produce answers that are not just "better scoring", but structurally more complete.
+C'est pourquoi le GoT peut produire des réponses qui ne sont pas juste "mieux score", mais structurellement plus complètes.
 
 ---
 
-### When to use GoT in real work
+### Quand utiliser le GoT dans le travail réel
 
-Use Graph of Thought when multiple perspectives must stay connected and influence each other.
+Utiliser le Graph of Thought quand multiple perspectives doivent rester connectées et s'influencer mutuellement.
 
-#### System admin mental model
+#### Mental model d'un System Admin
 
-A regional outage affects only some users and symptoms conflict across tools.
+Une panne régionale affecte uniquement certains utilisateurs et les symptômes sont contradictoires à travers les outils.
 
-- **Branches:** network routing issue, database replication lag, or auth-service dependency timeout.
-- **Contrast:** Compare branches that disagree (for example "network is healthy" vs "timeouts are network-shaped").
-- **Refine:** Update weaker explanations using fresh telemetry and cross-team notes.
-- **Aggregate:** Build a combined incident model that includes infra + app interactions.
-- **Conclude:** Coordinate a staged mitigation plan that addresses multiple contributing factors.
+- **Branches :** problème de routage réseau, délai de réplication DB, ou timeout de dépendance du service auth.
+- **Contrast :** Comparer les branches qui divergent (par exemple "le réseau est sain" vs "les timeouts ont une forme réseau").
+- **Refine :** Mettre à jour les explications plus faibles avec de la télémétrie fraîche et des notes cross-team.
+- **Aggregate :** Construire un model d'incident combiné qui inclut les interactions infra + app.
+- **Conclude :** Coordonner un plan de mitigation staged qui adresse multiple facteurs contributeurs.
 
-Why GoT fits: real incidents are often multi-causal, and discarding "weaker" signals too early can hide the true failure chain.
+Pourquoi le GoT fit : les vrais incidents sont souvent multi-cause, et jeter les signaux "plus faibles" trop tôt peut cacher la vraie chaîne d'échec.
 
-#### Developer mental model
+#### Mental model d'un Développeur
 
-A flaky end-to-end test fails unpredictably in CI but rarely locally.
+Un test end-to-end flaky échoue de manière imprévisible en CI mais rarement localement.
 
-- **Branches:** race condition, clock skew, test data coupling, or external API nondeterminism.
-- **Contrast:** Pair hypotheses against each other using failure traces and timestamps.
-- **Refine:** Improve weak hypotheses with strong evidence from logs and reruns.
-- **Aggregate:** Build an integrated explanation (for example timing bug + shared fixture contamination).
-- **Conclude:** Produce a fix plan that combines code changes, test isolation, and CI environment guards.
+- **Branches :** race condition, clock skew, couplage de données de test, ou nondéterminisme d'API externe.
+- **Contrast :** Appairer les hypothèses les unes contre les autres en utilisant les traces d'échec et les timestamps.
+- **Refine :** Améliorer les hypothèses faibles avec des preuves fortes des logs et reruns.
+- **Aggregate :** Construire une explication intégrée (par exemple bug de timing + contamination de fixture partagée).
+- **Conclude :** Produire un plan de fix qui combine changements de code, isolation de test et guards d'environnement CI.
 
-Why GoT fits: debugging often needs interaction between hypotheses, not a single winner picked too early.
+Pourquoi le GoT fit : le debugging a souvent besoin d'interaction entre hypothèses, pas d'un winner choisi trop tôt.
 
-#### AI agent creator mental model
+#### Mental model d'un Créateur d'Agent IA
 
-You are designing a research-grade planning agent for complex tasks (code + docs + infra).
+On conçoit un agent de planification de qualité recherche pour des tâches complexes (code + docs + infra).
 
-- **Branches:** different task decompositions and tool sequences.
-- **Contrast:** Let plans critique each other to expose hidden assumptions.
-- **Refine:** Improve weaker plans using strong-plan insights.
-- **Aggregate:** Merge complementary subplans into one robust strategy.
-- **Conclude:** Execute with richer context and keep traceable reasoning artifacts.
+- **Branches :** différentes décompositions de tâches et séquences d'outils.
+- **Contrast :** Laisser les plans se critiquer mutuellement pour exposer les hypothèses cachées.
+- **Refine :** Améliorer les plans plus faibles en utilisant les insights des plans forts.
+- **Aggregate :** Fusionner les sous-plans complémentaires en une stratégie robuste.
+- **Conclude :** Exécuter avec un contexte plus riche et garder des artefacts de raisonnement traçables.
 
-Why GoT fits: agents handling ambiguous, high-stakes tasks benefit from preserving and recombining reasoning rather than pruning early.
+Pourquoi le GoT fit : les agents gérant des tâches ambiguës et à haut enjeu bénéficient de préserver et recombinaison le raisonnement au lieu de pruner tôt.
 
-GoT is strongest when:
+Le GoT est le plus fort quand :
 
-- the problem is ambiguous,
-- weaker signals may become valuable after refinement,
-- and you want a final answer that preserves contradictions instead of hiding them.
+- le problème est ambigu,
+- les signaux plus faibles peuvent devenir précieux après raffinement,
+- et on veut une réponse finale qui préserve les contradictions au lieu de les cacher.
