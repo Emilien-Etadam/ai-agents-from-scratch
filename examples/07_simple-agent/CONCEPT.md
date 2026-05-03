@@ -1,38 +1,38 @@
-# Concept: Function Calling & Tool Use
+# Concept : Function Calling et Utilisation d'Outils
 
-## Overview
+## Vue d'Ensemble
 
-Function calling transforms LLMs from text generators into agents that can take actions and interact with the world.
+Le function calling transforme les LLMs de générateurs de texte en agents capables d'entreprendre des actions et d'interagir avec le monde.
 
-## What Makes an Agent?
-
-```
-Text Generator              Agent
-──────────────             ──────
-LLM → Text only            LLM + Tools → Can act
-```
-
-**Function calling** lets the LLM invoke predefined functions to access data or perform actions it cannot do alone.
-
-## The Core Idea
+## Qu'est-ce qui fait un Agent ?
 
 ```
-User: "What time is it?"
+Générateur de Texte           Agent
+──────────────               ──────
+LLM → Texte seul             LLM + Outils → Peut agir
+```
+
+Le **function calling** permet au LLM d'invoquer des fonctions prédéfinies pour accéder à des données ou effectuer des actions qu'il ne peut pas faire seul.
+
+## l'Idée Fondamentale
+
+```
+Utilisateur : "Quelle heure est-il ?"
        ↓
-LLM thinks: "I need current time"
-       ↓  
-LLM calls: getCurrentTime()
+LLM réfléchit : "J'ai besoin de l'heure actuelle"
        ↓
-Tool returns: "1:46:36 PM"
+LLM appelle : getCurrentTime()
        ↓
-LLM responds: "It's 13:46"
+Outil retourne : "1:46:36 PM"
+       ↓
+LLM répond : "Il est 13:46"
 ```
 
-This is agency - the ability to DO, not just SAY.
+C'est l'agency — la capacité d'AGIR, pas juste de DIRE.
 
-## How It Works
+## Comment Ça Fonctionne
 
-### 1. Function Definition
+### 1. Définition de Fonction
 ```javascript
 getCurrentTime = {
   description: "Get the current time",
@@ -40,30 +40,30 @@ getCurrentTime = {
 }
 ```
 
-### 2. LLM Sees Available Tools
+### 2. Le LLM Voit les Outils Disponibles
 ```
-Available functions:
+Fonctions disponibles :
 - getCurrentTime: "Get the current time"
-- getWeather: "Get weather for a city"  
+- getWeather: "Get weather for a city"
 - calculate: "Perform math"
 ```
 
-### 3. LLM Decides When to Use
+### 3. Le LLM Décident Quand Utiliser
 ```
-"What time?" → getCurrentTime() ✓
-"What's 5+5?" → calculate() ✓
-"Tell a joke" → No tool needed
+"Quelle heure ?" → getCurrentTime() ✓
+"Combien font 5+5 ?" → calculate() ✓
+"Raconte une blague" → Pas d'outil nécessaire
 ```
 
-## Real-World Applications
+## Applications Réelles
 
-**Personal Assistant**: Calendar, email, reminders
-**Research Agent**: Web search, document reading
-**Coding Assistant**: File operations, code execution
-**Data Analyst**: Database queries, calculations
+**Assistant Personnel** : Calendrier, email, rappels
+**Agent de Recherche** : Recherche web, lecture de documents
+**Assistant Codeur** : Opérations fichiers, exécution de code
+**Analyste de Données** : Requêtes base de données, calculs
 
-## Key Takeaway
+## Point Clé
 
-Function calling is THE feature that enables AI agents. Without it, LLMs can only talk. With it, they can act.
+Le function calling est LA fonctionnalité qui permet les agents IA. Sans ça, les LLMs peuvent seulement parler. Avec ça, ils peuvent agir.
 
-This is the foundation of all modern agent systems.
+C'est la fondation de tous les systèmes d'agents modernes.
