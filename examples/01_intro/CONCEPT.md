@@ -1,166 +1,166 @@
-# Concept: Basic LLM Interaction
+# Concept : Interaction de Base avec un LLM
 
-## Overview
+## Vue d'ensemble
 
-This example introduces the fundamental concepts of working with a Large Language Model (LLM) running locally on your machine. It demonstrates the simplest possible interaction: loading a model and asking it a question.
+Cet exemple présente les concepts fondamentaux du travail avec un Large Language Model (LLM) exécuté localement sur votre machine. Il démontre l'interaction la plus simple possible : charger un model et lui poser une question.
 
-## What is a Local LLM?
+## Qu'est-ce qu'un LLM Local ?
 
-A **Local LLM** is an AI language model that runs entirely on your own computer, without requiring internet connectivity or external API calls. Key benefits:
+Un **LLM Local** est un model de langage IA qui s'exécute entièrement sur votre propre ordinateur, sans nécessiter de connexion internet ou d'appels API externes. Principaux avantages :
 
-- **Privacy**: Your data never leaves your machine
-- **Cost**: No per-token API charges
-- **Control**: Full control over model selection and parameters
-- **Offline**: Works without internet connection
+- **Confidentialité** : Vos données ne quittent jamais votre machine
+- **Coût** : Pas de frais API par token
+- **Contrôle** : Contrôle total sur le choix du model et les paramètres
+- **Hors ligne** : Fonctionne sans connexion internet
 
-## Core Components
+## Composants Principaux
 
-### 1. Model Files (GGUF Format)
+### 1. Fichiers de Model (Format GGUF)
 
 ```
 ┌─────────────────────────────┐
 │   Qwen3-1.7B-Q8_0.gguf     │
-│   (Model Weights File)      │
+│   (Fichier de Poids du Model)│
 │                             │
-│  • Stores learned patterns  │
-│  • Quantized for efficiency │
-│  • Loaded into RAM/VRAM     │
+│  • Stocke les patterns appris │
+│  • Quantifié pour l'efficacité│
+│  • Chargé en RAM/VRAM       │
 └─────────────────────────────┘
 ```
 
-- **GGUF**: File format optimized for llama.cpp
-- **Quantization**: Reduces model size (e.g., 8-bit instead of 16-bit)
-- **Trade-off**: Smaller size and faster speed vs. slight quality loss
+- **GGUF** : Format de fichier optimisé pour llama.cpp
+- **Quantization** : Réduit la taille du model (par ex. 8-bit au lieu de 16-bit)
+- **Compromis** : Taille réduite et vitesse accrue vs. perte légère de qualité
 
-### 2. The Inference Pipeline
+### 2. Le Pipeline d'Inférence
 
 ```
-User Input → Model → Generation → Response
-    ↓          ↓          ↓           ↓
- "Hello"   Context   Sampling    "Hi there!"
+Entrée Utilisateur → Model → Génération → Réponse
+    ↓                ↓          ↓            ↓
+ "Bonjour"        Contexte   Échantillonnage  "Salut !"
 ```
 
-**Flow Diagram:**
+**Diagramme de Flux :**
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│  Prompt  │ --> │ Context  │ --> │  Model   │ --> │ Response │
-│          │     │ (Memory) │     │(Weights) │     │  (Text)  │
+│  Prompt  │ --> │ Contexte │ --> │  Model   │ --> │ Réponse  │
+│          │     │ (Mémoire)│     │(Poids)   │     │  (Texte) │
 └──────────┘     └──────────┘     └──────────┘     └──────────┘
 ```
 
-### 3. Context Window
+### 3. Fenêtre de Contexte
 
-The **context** is the model's working memory:
+Le **contexte** est la mémoire de travail du model :
 
 ```
 ┌─────────────────────────────────────────┐
-│           Context Window                │
+│           Fenêtre de Contexte            │
 │  ┌─────────────────────────────────┐   │
-│  │ System Prompt (if any)          │   │
+│  │ System Prompt (le cas échéant)  │   │
 │  ├─────────────────────────────────┤   │
-│  │ User: "do you know node-llama?" │   │
+│  │ Utilisateur : "do you know node-llama?" │
 │  ├─────────────────────────────────┤   │
-│  │ AI: "Yes, I'm familiar..."      │   │
+│  │ IA : "Yes, I'm familiar..."     │   │
 │  ├─────────────────────────────────┤   │
-│  │ (Space for more conversation)   │   │
+│  │ (Espace pour plus de conversation) │
 │  └─────────────────────────────────┘   │
 └─────────────────────────────────────────┘
 ```
 
-- Limited size (e.g., 2048, 4096, or 8192 tokens)
-- When full, old messages must be removed
-- All previous messages influence the next response
+- Taille limitée (par ex. 2048, 4096 ou 8192 tokens)
+- Lorsque c'est plein, les anciens messages doivent être supprimés
+- Tous les messages précédents influencent la prochaine réponse
 
-## How LLMs Generate Responses
+## Comment les LLMs Génèrent des Réponses
 
-### Token-by-Token Generation
+### Génération Token par Token
 
-LLMs don't generate entire sentences at once. They predict one **token** (word piece) at a time:
+Les LLMs ne génèrent pas des phrases entières d'un coup. Ils prévoient un **token** (morceau de mot) à la fois :
 
 ```
-Prompt: "What is AI?"
+Prompt : "Qu'est-ce que l'IA ?"
 
-Generation Process:
-"What is AI?" → [Model] → "AI"
-"What is AI? AI" → [Model] → "is"
-"What is AI? AI is" → [Model] → "a"
-"What is AI? AI is a" → [Model] → "field"
-... continues until stop condition
+Processus de génération :
+"Qu'est-ce que l'IA ?" → [Model] → "L'IA"
+"Qu'est-ce que l'IA ? L'IA" → [Model] → "est"
+"Qu'est-ce que l'IA ? L'IA est" → [Model] → "un"
+"Qu'est-ce que l'IA ? L'IA est un" → [Model] → "domaine"
+... continue jusqu'à la condition d'arrêt
 ```
 
-**Visualization:**
+**Visualisation :**
 ```
-Input Prompt
+Prompt en entrée
      ↓
 ┌────────────┐
-│   Model    │ → Token 1: "AI"
-│ Processes  │ → Token 2: "is"
-│   & Predicts│ → Token 3: "a"
-└────────────┘ → Token 4: "field"
+│   Model    │ → Token 1 : "L'IA"
+│  Traite    │ → Token 2 : "est"
+│ & Prédit   │ → Token 3 : "un"
+└────────────┘ → Token 4 : "domaine"
                 → ...
 ```
 
-## Key Concepts for AI Agents
+## Concepts Clés pour les AI Agents
 
-### 1. Stateless Processing
-- Each prompt is independent unless you maintain context
-- The model has no memory between different script runs
-- To build an "agent", you need to:
-  - Keep the context alive between prompts
-  - Maintain conversation history
-  - Add tools/functions (covered in later examples)
+### 1. Traitement Stateless
+- Chaque prompt est indépendant sauf si vous maintenez un contexte
+- Le model n'a pas de mémoire entre les différentes exécutions de script
+- Pour construire un "agent", vous devez :
+  - Garder le contexte vivant entre les prompts
+  - Maintenez l'historique de la conversation
+  - Ajouter des outils/fonctions (couvert dans les exemples suivants)
 
-### 2. Prompt Engineering Basics
-The way you phrase questions affects the response:
-
-```
-❌ Poor: "node-llama-cpp"
-✅ Better: "do you know node-llama-cpp"
-✅ Best: "Explain what node-llama-cpp is and how it works"
-```
-
-### 3. Resource Management
-LLMs consume significant resources:
+### 2. Bases du Prompt Engineering
+La façon dont vous formulez les questions affecte la réponse :
 
 ```
-Model Loading
+❌ Mauvais : "node-llama-cpp"
+✅ Mieux : "do you know node-llama-cpp"
+✅ Meilleur : "Explain what node-llama-cpp is and how it works"
+```
+
+### 3. Gestion des Ressources
+Les LLMs consomment des ressources significatives :
+
+```
+Chargement du Model
      ↓
 ┌─────────────────┐
-│  RAM/VRAM Usage │  ← Models need gigabytes
-│  CPU/GPU Time   │  ← Inference takes time
-│  Memory Leaks?  │  ← Must cleanup properly
+│  Usage RAM/VRAM │  ← Les models ont besoin de gigaoctets
+│  Temps CPU/GPU  │  ← L'inférence prend du temps
+│  Fuites mémoire ?│  ← Nettoyage obligatoire
 └─────────────────┘
      ↓
-Proper Disposal
+Disposal Approprié
 ```
 
-## Why This Matters for Agents
+## Pourquoi C'est Important pour les Agents
 
-This basic example establishes the foundation for AI agents:
+Cet exemple basique établit les fondations des AI agents :
 
-1. **Agents need LLMs to "think"**: The model processes information and generates responses
-2. **Agents need context**: To maintain state across interactions
-3. **Agents need structure**: Later examples add tools, memory, and reasoning loops
+1. **Les agents ont besoin de LLMs pour "penser"** : Le model traite l'information et génère des réponses
+2. **Les agents ont besoin de contexte** : Pour maintenir l'état à travers les interactions
+3. **Les agents ont besoin de structure** : Les exemples suivants ajoutent des outils, de la mémoire et des boucles de raisonnement
 
-## Next Steps
+## Prochaines Étapes
 
-After understanding basic prompting, explore:
-- **System prompts**: Giving the model a specific role or behavior
-- **Function calling**: Allowing the model to use tools
-- **Memory**: Persisting information across sessions
-- **Reasoning patterns**: Like ReAct (Reasoning + Acting)
+Après avoir compris le prompting de base, explorez :
+- **System prompts** : Donner au model un rôle ou un comportement spécifique
+- **Function calling** : Permettre au model d'utiliser des outils
+- **Mémoire** : Persister l'information à travers les sessions
+- **Patterns de raisonnement** : Comme ReAct (Reasoning + Acting)
 
-## Diagram: Complete Architecture
+## Diagramme : Architecture Complète
 
 ```
 ┌──────────────────────────────────────────────────┐
-│            Your Application                      │
+│            Votre Application                      │
 │  ┌────────────────────────────────────────────┐ │
-│  │         node-llama-cpp Library             │ │
+│  │         Bibliothèque node-llama-cpp        │ │
 │  │  ┌──────────────────────────────────────┐  │ │
-│  │  │      llama.cpp (C++ Runtime)         │  │ │
+│  │  │      llama.cpp (Runtime C++)         │  │ │
 │  │  │  ┌────────────────────────────────┐  │  │ │
-│  │  │  │   Model File (GGUF)            │  │  │ │
+│  │  │  │   Fichier de Model (GGUF)      │  │  │ │
 │  │  │  │   • Qwen3-1.7B-Q8_0.gguf       │  │  │ │
 │  │  │  └────────────────────────────────┘  │  │ │
 │  │  └──────────────────────────────────────┘  │ │
@@ -172,4 +172,4 @@ After understanding basic prompting, explore:
     └──────────────┘
 ```
 
-This layered architecture allows you to build sophisticated AI agents on top of basic LLM interactions.
+Cette architecture en couches vous permet de construire des AI agents sophistiqués à partir d'interactions LLM de base.
