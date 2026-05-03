@@ -1,174 +1,175 @@
-# Concept: Streaming & Response Control
+# Concept : Streaming et Contrôle des Réponses
 
-## Overview
+## Vue d'Ensemble
 
-This example demonstrates **streaming responses** and **token limits**, two essential techniques for building responsive AI agents with controlled output.
+Cet exemple démontre les **réponses en streaming** et les **limites de tokens**, deux techniques essentielles pour construire des agents IA réactifs avec une sortie contrôlée.
 
-## The Streaming Problem
+## Le Problème du Streaming
 
-### Traditional (Non-Streaming) Approach
-
-```
-User sends prompt
-       ↓
-   [Wait 10 seconds...]
-       ↓
-Complete response appears all at once
-```
-
-**Problems:**
-- Poor user experience (long wait)
-- No progress indication
-- Can't interrupt bad responses
-- Feels unresponsive
-
-### Streaming Approach (This Example)
+### Approche Traditionnelle (Sans Streaming)
 
 ```
-User sends prompt
+L'utilisateur envoie un prompt
        ↓
-"Hoisting" (0.1s) → User sees first word!
+   [Attendre 10 secondes...]
        ↓
-"is a" (0.2s) → More text appears
-       ↓
-"JavaScript" (0.3s) → Continuous feedback
-       ↓
-[Continues token by token...]
+La réponse complète apparaît d'un coup
 ```
 
-**Benefits:**
-- Immediate feedback
-- Progress visible
-- Can interrupt early
-- Feels interactive
+**Problèmes :**
+- Mauvaise expérience utilisateur (longue attente)
+- Pas d'indication de progression
+- Impossible d'interrompre une mauvaise réponse
+- Paraît non réactif
 
-## How Streaming Works
-
-### Token-by-Token Generation
-
-LLMs generate one token at a time internally. Streaming exposes this:
+### Approche Streaming (Cet Exemple)
 
 ```
-Internal LLM Process:
+L'utilisateur envoie un prompt
+       ↓
+"Hoisting" (0,1s) → L'utilisateur voit le premier mot !
+       ↓
+"is a" (0,2s) → Plus de texte apparaît
+       ↓
+"JavaScript" (0,3s) → Feedback continu
+       ↓
+[Continue token par token...]
+```
+
+**Bénéfices :**
+- Feedback immédiat
+- Progression visible
+- Peut interrompre tôt
+- Paraît interactif
+
+## Comment le Streaming Fonctionne
+
+### Génération Token par Token
+
+Les LLMs génèrent un token à la fois en interne. Le streaming expose ce processus :
+
+```
+Processus Interne du LLM :
 ┌─────────────────────────────────────┐
-│  Token 1: "Hoisting"                │
-│  Token 2: "is"                      │
-│  Token 3: "a"                       │
-│  Token 4: "JavaScript"              │
-│  Token 5: "mechanism"               │
-│  ...                                │
+│  Token 1 : "Hoisting"              │
+│  Token 2 : "is"                    │
+│  Token 3 : "a"                     │
+│  Token 4 : "JavaScript"            │
+│  Token 5 : "mechanism"             │
+│  ...                               │
 └─────────────────────────────────────┘
 
-Without Streaming:        With Streaming:
-Wait for all tokens       Emit each token immediately
-└─→ Buffer → Return      └─→ Callback → Display
+Sans Streaming :          Avec Streaming :
+Attendre tous les tokens  Émettre chaque token immédiatement
+└─→ Buffer → Retourner    └─→ Callback → Afficher
 ```
 
-### The onTextChunk Callback
+### le Callback onTextChunk
 
 ```
 ┌────────────────────────────────────┐
-│        Model Generation            │
+│        Génération du Model         │
 └────────────┬───────────────────────┘
              │
     ┌────────┴─────────┐
-    │  Each new token  │
+    │  Chaque nouveau  │
+    │  token           │
     └────────┬─────────┘
              ↓
     ┌────────────────────┐
-    │ onTextChunk(text)  │  ← Your callback
+    │ onTextChunk(text)  │  ← Votre callback
     └────────┬───────────┘
              ↓
-    Your code processes it:
-    • Display to user
-    • Send over network
-    • Log to file
-    • Analyze content
+    Votre code le traite :
+    • Afficher à l'utilisateur
+    • Envoyer sur le réseau
+    • Logguer dans un fichier
+    • Analyser le contenu
 ```
 
-## Token Limits: maxTokens
+## Limites de Tokens : maxTokens
 
-### Why Limit Output?
+### Pourquoi Limiter la Sortie ?
 
-Without limits, models might generate:
+Sans limites, les models peuvent générer :
 ```
-User: "Explain hoisting"
-Model: [Generates 10,000 words including:
-        - Complete JavaScript history
-        - Every edge case
-        - Unrelated examples
-        - Never stops...]
-```
-
-With limits:
-```
-User: "Explain hoisting"
-Model: [Generates ~1500 words
-        - Core concept
-        - Key examples
-        - Stops at 2000 tokens]
+Utilisateur : "Explique le hoisting"
+Model : [Génère 10 000 mots incluant :
+         - L'histoire complète de JavaScript
+         - Chaque cas limite
+         - Des exemples non pertinents
+         - Ne s'arrête jamais...]
 ```
 
-### Token Budgeting
-
+Avec limites :
 ```
-Context Window: 4096 tokens
-├─ System Prompt: 200 tokens
-├─ User Message: 100 tokens
-├─ Response (maxTokens): 2000 tokens
-└─ Remaining for history: 1796 tokens
-
-Total used: 2300 tokens
-Available: 1796 tokens for future conversation
+Utilisateur : "Explique le hoisting"
+Model : [Génère ~1500 mots
+         - Concept central
+         - Exemples clés
+         - S'arrête à 2000 tokens]
 ```
 
-### Cost vs Quality
+### Budgétisation des Tokens
 
 ```
-Token Limit        Output Quality      Use Case
+Fenêtre de Context : 4096 tokens
+├─ System Prompt : 200 tokens
+├─ Message Utilisateur : 100 tokens
+├─ Réponse (maxTokens) : 2000 tokens
+└─ Restant pour historique : 1796 tokens
+
+Total utilisé : 2300 tokens
+Disponible : 1796 tokens pour la suite de la conversation
+```
+
+### Coût vs Qualité
+
+```
+Limite Tokens        Qualité Sortie      Cas d'Usage
 ───────────       ───────────────     ─────────────────
-100               Brief, may be cut   Quick answers
-500               Concise but complete Short explanations
-2000 (example)    Detailed            Full explanations
-No limit          Risk of rambling    When length unknown
+100               Bref, peut être coupé   Réponses rapides
+500               Concis mais complet    Explications courtes
+2000 (exemple)    Détaillé              Explications complètes
+Sans limite       Risque de divagation   Quand la longueur est inconnue
 ```
 
-## Real-Time Applications
+## Applications en Temps Réel
 
-### Pattern 1: Interactive CLI
+### Pattern 1 : CLI Interactif
 
 ```
-User: "Explain closures"
+Utilisateur : "Explique les closures"
        ↓
-Terminal: "A closure is a function..."
-         (Appears word by word, like typing)
+Terminal : "A closure is a function..."
+         (Apparaît mot par mot, comme de la frappe)
        ↓
-User sees progress, knows it's working
+L'utilisateur voit la progression, sait que ça marche
 ```
 
-### Pattern 2: Web Application
+### Pattern 2 : Application Web
 
 ```
-Browser                    Server
-   │                         │
-   ├─── Send prompt ────────→│
-   │                         │
-   │←── Chunk 1: "Closures"──┤
-   │    (Display immediately) │
-   │                         │
-   │←── Chunk 2: "are"───────┤
-   │    (Append to display)  │
-   │                         │
-   │←── Chunk 3: "functions"─┤
-   │    (Keep appending...)  │
+Navigateur                   Serveur
+   │                           │
+   ├─── Envoyer prompt ──────→│
+   │                           │
+   │←── Chunk 1 : "Closures"──┤
+   │    (Afficher immédiatement)│
+   │                           │
+   │←── Chunk 2 : "are"───────┤
+   │    (Ajouter à l'affichage) │
+   │                           │
+   │←── Chunk 3 : "functions"─┤
+   │    (Continuer d'ajouter...)│
 ```
 
-Implementation:
+Implémentation :
 - Server-Sent Events (SSE)
 - WebSockets
-- HTTP streaming
+- Streaming HTTP
 
-### Pattern 3: Multi-Consumer
+### Pattern 3 : Multi-Consommateur
 
 ```
          onTextChunk(text)
@@ -176,225 +177,225 @@ Implementation:
         ┌───────┼───────┐
         ↓       ↓       ↓
     Console  WebSocket  Log File
-    Display  → Client   → Storage
+    Affichage  → Client   → Stockage
 ```
 
-## Performance Characteristics
+## Caractéristiques de Performance
 
-### Latency vs Throughput
-
-```
-Time to First Token (TTFT):
-├─ Small model (1.7B): ~100ms
-├─ Medium model (8B): ~200ms
-└─ Large model (20B): ~500ms
-
-Tokens Per Second:
-├─ Small model: 50-80 tok/s
-├─ Medium model: 20-35 tok/s
-└─ Large model: 10-15 tok/s
-
-User Experience:
-TTFT < 500ms → Feels instant
-Tok/s > 20 → Reads naturally
-```
-
-### Resource Trade-offs
+### Latence vs Débit
 
 ```
-Model Size      Memory    Speed     Quality
+Time to First Token (TTFT) :
+├─ Petit model (1,7B) : ~100ms
+├─ Model moyen (8B) : ~200ms
+└─ Grand model (20B) : ~500ms
+
+Tokens par Seconde :
+├─ Petit model : 50-80 tok/s
+├─ Model moyen : 20-35 tok/s
+└─ Grand model : 10-15 tok/s
+
+Expérience Utilisateur :
+TTFT < 500ms → Paraît instantané
+Tok/s > 20 → Lecture naturelle
+```
+
+### Compromis de Ressources
+
+```
+Taille Model      Mémoire    Vitesse     Qualité
 ──────────     ────────   ─────     ───────
-1.7B           ~2GB       Fast      Good
-8B             ~6GB       Medium    Better
-20B            ~12GB      Slower    Best
+1,7B           ~2 Go       Rapide      Bonne
+8B             ~6 Go       Moyenne     Meilleure
+20B            ~12 Go      Plus lente  Meilleure
 ```
 
-## Advanced Concepts
+## Concepts Avancés
 
-### Buffering Strategies
+### Stratégies de Buffering
 
-**No Buffer (Immediate)**
+**Pas de Buffer (Immédiat)**
 ```
-Every token → callback → display
-└─ Smoothest UX but more overhead
+Chaque token → callback → affichage
+└─ UX la plus fluide mais plus de surcharge
 ```
 
 **Line Buffer**
 ```
-Accumulate until newline → flush
-└─ Better for paragraph-based output
+Accumuler jusqu'à saut de ligne → flush
+└─ Mieux pour une sortie par paragraphes
 ```
 
 **Time Buffer**
 ```
-Accumulate for 50ms → flush batch
-└─ Reduces callback frequency
+Accumuler pendant 50ms → flush batch
+└─ Réduit la fréquence des callbacks
 ```
 
-### Early Stopping
+### Arrêt Anticipé
 
 ```
-Generation in progress:
+Génération en cours :
 "The answer is clearly... wait, actually..."
                          ↑
-                  onTextChunk detects issue
+                  onTextChunk détecte un problème
                          ↓
-                   Stop generation
+                   Arrêter la génération
                          ↓
               "Let me reconsider"
 ```
 
-Useful for:
-- Detecting off-topic responses
-- Safety filters
-- Relevance checking
+Utile pour :
+- Détecter les réponses hors sujet
+- Filtres de sécurité
+- Vérification de pertinence
 
-### Progressive Enhancement
+### Amélioration Progressive
 
 ```
-Partial Response Analysis:
+Analyse de Réponse Partielle :
 ┌─────────────────────────────────┐
 │ "To implement this feature..."  │
 │                                 │
-│ ← Already useful information   │
+│ ← Déjà de l'information utile  │
 │                                 │
 │ "...you'll need: 1) Node.js"    │
 │                                 │
-│ ← Can start acting on this     │
+│ ← Peut commencer à agir dessus │
 │                                 │
 │ "2) Express framework"          │
 └─────────────────────────────────┘
 
-Agent can begin working before response completes!
+L'agent peut commencer à travailler avant la fin de la réponse !
 ```
 
-## Context Size Awareness
+## Awareness de la Taille de Context
 
-### Why It Matters
+### Pourquoi Ça Compte
 
 ```
 ┌────────────────────────────────┐
-│    Context Window (4096)       │
+│    Fenêtre de Context (4096)   │
 ├────────────────────────────────┤
-│ System Prompt       200 tokens │
-│ Conversation History 1000      │
-│ Current Prompt      100        │
-│ Response Space      2796       │
+│ System Prompt        200 tokens│
+│ Historique Conversation 1000   │
+│ Prompt Actuel         100      │
+│ Espace Réponse        2796     │
 └────────────────────────────────┘
 
-If maxTokens > 2796:
-└─→ Error or truncation!
+Si maxTokens > 2796 :
+└─→ Erreur ou troncature !
 ```
 
-### Dynamic Adjustment
+### Ajustement Dynamique
 
 ```
-Available = contextSize - (prompt + history)
+Disponible = contextSize - (prompt + historique)
 
-if (maxTokens > available) {
-    maxTokens = available;
-    // or clear old history
+if (maxTokens > disponible) {
+    maxTokens = disponible;
+    // ou effacer l'ancien historique
 }
 ```
 
-## Streaming in Agent Architectures
+## Streaming dans les Architectures d'Agents
 
-### Simple Agent
-
-```
-User → LLM (streaming) → Display
-       └─ onTextChunk shows progress
-```
-
-### Multi-Step Agent
+### Agent Simple
 
 ```
-Step 1: Plan (stream) → Show thinking
-Step 2: Act (stream) → Show action
-Step 3: Result (stream) → Show outcome
-       └─ User sees agent's process
+Utilisateur → LLM (streaming) → Affichage
+       └─ onTextChunk montre la progression
 ```
 
-### Collaborative Agents
+### Agent Multi-Étapes
+
+```
+Étape 1 : Planifier (stream) → Montrer la réflexion
+Étape 2 : Agir (stream) → Montrer l'action
+Étape 3 : Résultat (stream) → Montrer le résultat
+       └─ L'utilisateur voit le processus de l'agent
+```
+
+### Agents Collaboratifs
 
 ```
 Agent A (streaming) ──┐
-                      ├─→ Coordinator → User
+                      ├─→ Coordinateur → Utilisateur
 Agent B (streaming) ──┘
-       └─ Both stream simultaneously
+       └─ Les deux stream simultanément
 ```
 
-## Best Practices
+## Bonnes Pratiques
 
-### 1. Always Set maxTokens
+### 1. Toujours Définir maxTokens
 
 ```
-✓ Good:
+✓ Bon :
 session.prompt(query, { maxTokens: 2000 })
 
-✗ Risky:
+✗ Risqué :
 session.prompt(query)
-└─ May use entire context!
+└─ Peut utiliser tout le context !
 ```
 
-### 2. Handle Partial Updates
+### 2. Gérer les Mises à Jour Partielles
 
 ```
-let fullResponse = '';
+let réponseComplete = '';
 onTextChunk: (chunk) => {
-    fullResponse += chunk;
-    display(chunk);        // Show immediately
-    logComplete = false;   // Mark incomplete
+    réponseComplete += chunk;
+    afficher(chunk);          // Afficher immédiatement
+    logComplet = false;       // Marquer comme incomplet
 }
-// After completion:
-saveToDatabase(fullResponse);
+// Après achèvement :
+sauvegarderDansBDD(réponseComplete);
 ```
 
-### 3. Provide Feedback
+### 3. Fournir du Feedback
 
 ```
 onTextChunk: (chunk) => {
-    if (firstChunk) {
-        showLoadingDone();
-        firstChunk = false;
+    if (premierChunk) {
+        cacherChargement();
+        premierChunk = false;
     }
-    appendToDisplay(chunk);
+    ajouterÀAffichage(chunk);
 }
 ```
 
-### 4. Monitor Performance
+### 4. Surveiller les Performances
 
 ```
 const startTime = Date.now();
 let tokenCount = 0;
 
 onTextChunk: (chunk) => {
-    tokenCount += estimateTokens(chunk);
+    tokenCount += estimerTokens(chunk);
     const elapsed = (Date.now() - startTime) / 1000;
-    const tokensPerSecond = tokenCount / elapsed;
-    updateMetrics(tokensPerSecond);
+    const tokensParSeconde = tokenCount / elapsed;
+    mettreAJourMetrics(tokensParSeconde);
 }
 ```
 
-## Key Takeaways
+## Points Clés
 
-1. **Streaming improves UX**: Users see progress immediately
-2. **maxTokens controls cost**: Prevents runaway generation
-3. **Token-by-token generation**: LLMs produce one token at a time
-4. **onTextChunk callback**: Your hook into the generation process
-5. **Context awareness matters**: Monitor available space
-6. **Essential for production**: Real-time systems need streaming
+1. **Le streaming améliore l'UX** : Les utilisateurs voient la progression immédiatement
+2. **maxTokens contrôle le coût** : Empêche la génération sans fin
+3. **Génération token par token** : Les LLMs produisent un token à la fois
+4. **Callback onTextChunk** : Votre hook dans le processus de génération
+5. **L'awareness du contexte compte** : Surveiller l'espace disponible
+6. **Essentiel pour la production** : Les systèmes en temps réel nécessitent du streaming
 
-## Comparison
+## Comparaison
 
 ```
-Feature           intro.js    coding.js (this)
-────────────────  ─────────   ─────────────────
-Streaming         ✗           ✓
-Token limit       ✗           ✓ (2000)
-Real-time output  ✗           ✓
-Progress visible  ✗           ✓
-User control      ✗           ✓
+Fonctionnalité        intro.js    coding.js (ici)
+────────────────     ─────────   ──────────────
+Streaming             ✗           ✓
+Limite tokens         ✗           ✓ (2000)
+Sortie temps réel     ✗           ✓
+Progression visible   ✗           ✓
+Contrôle utilisateur  ✗           ✓
 ```
 
-This pattern is foundational for building responsive, user-friendly AI agent interfaces.
+Ce pattern est fondamental pour construire des interfaces d'agents IA réactives et conviviales.
