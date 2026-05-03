@@ -1,10 +1,10 @@
-# Code Explanation: translation.js
+# Explication du Code : translation.js
 
-This file demonstrates how to use **system prompts** to specialize an AI agent for a specific task - in this case, professional German translation.
+Ce fichier démontre comment utiliser les **system prompts** pour spécialiser un agent IA pour une tâche spécifique — dans ce cas, la traduction allemande professionnelle.
 
-## Step-by-Step Code Breakdown
+## Décomposition du Code étape par étape
 
-### 1. Import Required Modules
+### 1. Importer les Modules Requis
 ```javascript
 import {
   getLlama, LlamaChatSession,
@@ -12,9 +12,9 @@ import {
 import {fileURLToPath} from "url";
 import path from "path";
 ```
-- Imports are the same as the intro example
+- Les imports sont les mêmes que dans l'exemple intro
 
-### 2. Initialize and Load Model
+### 2. Initialiser et Charger le Model
 ```javascript
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,22 +29,22 @@ const model = await llama.loadModel({
 });
 ```
 
-#### Why Apertus-8B?
-Apertus-8B is a multilingual language model specifically trained to support over 1,000 languages, with 40% of its training data in non-English languages. This makes it an excellent choice for translation tasks because:
+#### Pourquoi Apertus-8B ?
+Apertus-8B est un model de langage multilingue spécifiquement entraîné pour supporter plus de 1 000 langues, avec 40 % de ses données d'entraînement dans des langues autres que l'anglais. Cela en fait un excellent choix pour les tâches de traduction car :
 
-1. **Massive Multilingual Coverage**: The model was trained on 15 trillion tokens across 1,811 natively supported languages, including underrepresented languages like Swiss German and Romansh
-2. **Larger Size**: With 8 billion parameters, it's larger than the intro.js example, providing better understanding and output quality
-3. **Translation-Focused Training**: The model was explicitly designed for applications including translation systems
-4. **Q6_K Quantization**: 6-bit quantization provides a good balance between quality and file size
+1. **Couverture Multilingue Massive** : Le model a été entraîné sur 15 billions de tokens à travers 1 811 langues nativement supportées, incluant des langues sous-représentées comme l'allemand suisse et le romanche
+2. **Taille plus grande** : Avec 8 milliards de paramètres, il est plus grand que l'exemple intro.js, offrant une meilleure compréhension et qualité de sortie
+3. **Entraînement axé traduction** : Le model a été explicitement conçu pour des applications incluant les systèmes de traduction
+4. **Quantization Q6_K** : La quantization 6-bit offre un bon équilibre entre qualité et taille de fichier
 
-**Experiment suggestion**: Try swapping this model with others to compare translation quality! For example:
-- Use a smaller 3B model to see how size affects translation accuracy
-- Use a monolingual model to demonstrate why multilingual training matters
-- Use a general-purpose model without translation-specific training
+**Suggestion d'expérience** : Essayez de remplacer ce model par d'autres pour comparer la qualité de traduction ! Par exemple :
+- Utilisez un model 3B plus petit pour voir comment la taille affecte la précision de traduction
+- Utilisez un model monolingue pour démontrer pourquoi l'entraînement multilingue est important
+- Utilisez un model généraliste sans entraînement spécifique à la traduction
 
-Read more about Apertus [arXiv](https://arxiv.org/abs/2509.14233)
+Lisez plus sur Apertus [arXiv](https://arxiv.org/abs/2509.14233)
 
-### 3. Create Context and Chat Session with System Prompt
+### 3. Créer le Context et la Session Chat avec System Prompt
 ```javascript
 const context = await model.createContext();
 const session = new LlamaChatSession({
@@ -53,114 +53,114 @@ const session = new LlamaChatSession({
 });
 ```
 
-**Key difference from intro.js**: The **systemPrompt**!
+**Différence clé avec intro.js** : Le **systemPrompt** !
 
-#### What is a System Prompt?
-The system prompt defines the agent's role, behavior, and rules. It's like giving the AI a job description:
+#### Qu'est-ce qu'un System Prompt ?
+Le system prompt définit le rôle, le comportement et les règles de l'agent. C'est comme donner à l'IA une fiche de poste :
 
 ```
 ┌─────────────────────────────────────┐
 │       System Prompt                 │
 │  "You are a professional translator"│
-│  + Detailed instructions            │
-│  + Rules to follow                  │
+│  + Instructions détaillées           │
+│  + Règles à suivre                  │
 └─────────────────────────────────────┘
          ↓
-    Affects every response
+    Influence chaque réponse
 ```
 
-### 4. The System Prompt Breakdown
+### 4. Analyse du System Prompt
 
-The system prompt (in German) tells the model:
+Le system prompt (en allemand) indique au model :
 
-**Role:**
+**Rôle :**
 ```
-"Du bist ein erfahrener wissenschaftlicher Übersetzer für technische Texte 
+"Du bist ein erfahrener wissenschaftlicher Übersetzer für technische Texte
 aus dem Englischen ins Deutsche."
 ```
-Translation: "You are an experienced scientific translator for technical texts from English to German."
+Traduction : « Vous êtes un traducteur scientifique expérimenté pour des textes techniques de l'anglais vers l'allemand. »
 
-**Task:**
+**Tâche :**
 ```
 "Deine Aufgabe: Erstelle eine inhaltlich exakte Übersetzung..."
 ```
-Translation: "Your task: Create a content-accurate translation that maintains full meaning and technical precision."
+Traduction : « Votre tâche : Créer une traduction exacte du contenu qui maintient le sens complet et la précision technique. »
 
-**Rules (Lines 33-41):**
-1. Preserve every technical statement exactly
-2. Use idiomatic, fluent German
-3. Avoid literal sentence structures
-4. Use correct terminology (e.g., "Multi-Agenten-System")
-5. Use German typography for numbers (e.g., "54 %")
-6. Adapt compound terms to German grammar
-7. Shorten overly complex sentences while preserving meaning
-8. Use neutral, scientific style
+**Règles (lignes 33-41) :**
+1. Préserver chaque affirmation technique exactement
+2. Utiliser un allemand idiomatique et fluide
+3. Éviter les structures de phrases littérales
+4. Utiliser la terminologie correcte (ex. "Multi-Agenten-System")
+5. Utiliser la typographie allemande pour les nombres (ex. "54 %")
+6. Adapter les termes composés à la grammaire allemande
+7. Raccourcir les phrases trop complexes tout en préservant le sens
+8. Utiliser un style neutre et scientifique
 
-**Critical Instruction (Line 48):**
+**Instruction Critique (ligne 48) :**
 ```
 "DO NOT add any addition text or explanation. ONLY respond with the translated text"
 ```
-- Forces the model to return ONLY the translation
-- No "Here's the translation:" prefix
-- No explanations or commentary
+- Force le model à retourner UNIQUEMENT la traduction
+- Pas de préfixe "Voici la traduction :"
+- Pas d'explications ou de commentaires
 
-### 5. The Translation Query
+### 5. La Requête de Traduction
 ```javascript
-const q1 = `Translate this text into german: 
+const q1 = `Translate this text into german:
 
 We address the long-horizon gap in large language model (LLM) agents by en-
 abling them to sustain coherent strategies in adversarial, stochastic environments.
 ...
 `;
 ```
-- Contains a scientific abstract about LLM agents (HexMachina paper)
-- Complex technical content with specialized terms
-- Tests the model's ability to:
-  - Understand technical AI/ML concepts
-  - Translate accurately
-  - Follow the detailed system prompt rules
+- Contient un abstract scientifique sur les agents LLM (paper HexMachina)
+- Contenu technique complexe avec des termes spécialisés
+- Teste la capacité du model à :
+  - Comprendre les concepts techniques IA/ML
+  - Traduire avec précision
+  - Suivre les règles détaillées du system prompt
 
-### 6. Execute Translation
+### 6. Exécuter la Traduction
 ```javascript
 const a1 = await session.prompt(q1);
 console.log("AI: " + a1);
 ```
-- Sends the translation request to the model
-- The model will:
-  1. Read the system prompt (its "role")
-  2. Read the user's request
-  3. Apply all the rules from the system prompt
-  4. Generate a German translation
+- Envoie la requête de traduction au model
+- Le model va :
+  1. Lire le system prompt (son "rôle")
+  2. Lire la requête de l'utilisateur
+  3. Appliquer toutes les règles du system prompt
+  4. Générer une traduction allemande
 
-### 7. Cleanup
+### 7. Nettoyage
 ```javascript
 session.dispose()
 context.dispose()
 model.dispose()
 llama.dispose()
 ```
-- Same cleanup as intro.js
-- Always dispose resources when done
+- Même nettoyage que dans intro.js
+- Toujours libérer les ressources une fois terminé
 
-## Key Concepts Demonstrated
+## Concepts Clés Démontrés
 
-### 1. System Prompts for Specialization
-System prompts transform a general-purpose LLM into a specialized agent:
+### 1. System Prompts pour la Spécialisation
+Les system prompts transforment un LLM généraliste en un agent spécialisé :
 
 ```
-General LLM + System Prompt = Specialized Agent
-                              (Translator, Coder, Analyst, etc.)
+LLM Généraliste + System Prompt = Agent Spécialisé
+                                  (Traducteur, Codeur, Analyste, etc.)
 ```
 
-### 2. Detailed Instructions Matter
-Compare these approaches:
+### 2. Les Instructions Détaillées Comptent
+Comparez ces approches :
 
-**❌ Minimal approach:**
+**❌ Approche minimale :**
 ```javascript
 systemPrompt: "Translate to German"
 ```
 
-**✅ This example (detailed):**
+**✅ Cet exemple (détaillé) :**
 ```javascript
 systemPrompt: `
   You are a professional translator
@@ -172,60 +172,60 @@ systemPrompt: `
 `
 ```
 
-The detailed approach gives much better, more consistent results.
+L'approche détaillée donne des résultats bien meilleurs et plus cohérents.
 
-### 3. Constraining Output Format
-The line "DO NOT add any addition text" demonstrates output control:
+### 3. Contraindre le Format de Sortie
+La ligne "DO NOT add any addition text" démontre le contrôle de sortie :
 
-**Without constraint:**
+**Sans contrainte :**
 ```
 AI: Here's the translation of the text you provided:
 
-[German text]
+[Texte allemand]
 
 I hope this helps! Let me know if you need anything else.
 ```
 
-**With constraint:**
+**Avec contrainte :**
 ```
-AI: [German text only]
+AI: [Texte allemand uniquement]
 ```
 
-## What Makes This an "Agent"?
+## Ce Qui Fait Un "Agent" Ici
 
-This is a **specialized agent** because:
+C'est un **agent spécialisé** car :
 
-1. **Specific Role**: Has a defined purpose (translation)
-2. **Constrained Behavior**: Follows specific rules and guidelines
-3. **Consistent Output**: Produces predictable, formatted results
-4. **Domain Expertise**: Optimized for scientific/technical content
+1. **Rôle Spécifique** : A un but défini (traduction)
+2. **Comportement Contraint** : Suit des règles et directives spécifiques
+3. **Sortie Cohérente** : Produit des résultats prévisibles et formatés
+4. **Expertise Domainale** : Optimisé pour le contenu scientifique/technique
 
-## Expected Output
+## Sortie Attendue
 
-When run, you'll see a German translation of the English abstract, following all the rules:
-- Proper German scientific style
-- Correct technical terminology
-- German number formatting (e.g., "54 %")
-- No extra commentary
+Lors de l'exécution, vous verrez une traduction allemande de l'abstract anglais, suivant toutes les règles :
+- Style scientifique allemand approprié
+- Terminologie technique correcte
+- Formatage numérique allemand (ex. "54 %")
+- Aucun commentaire supplémentaire
 
-The quality depends on the model's training and size.
+La qualité dépend de l'entraînement et de la taille du model.
 
-## Experimentation Ideas
+## Idées d'Expérimentation
 
-1. **Try different models**:
-  - Swap Apertus-8B with a smaller model (3B) to see size impact
-  - Try a monolingual English model to demonstrate the importance of multilingual training
-  - Use models with different quantization levels (Q4, Q6, Q8) to compare quality vs. size
+1. **Essayez différents models :**
+  - Remplacez Apertus-8B par un model plus petit (3B) pour voir l'impact de la taille
+  - Essayez un model monolingue anglais pour démontrer l'importance de l'entraînement multilingue
+  - Utilisez des models avec différents niveaux de quantization (Q4, Q6, Q8) pour comparer qualité vs. taille
 
-2. **Modify the system prompt**:
-  - Remove specific rules one by one to see their impact
-  - Change the translation target language
-  - Adjust the style (formal vs. casual)
+2. **Modifiez le system prompt :**
+  - Supprimez les règles une par une pour voir leur impact
+  - Changez la langue cible de la traduction
+  - Ajustez le style (formel vs. décontracté)
 
-3. **Test with different content**:
-  - Technical documentation
-  - Creative writing
-  - Business communications
-  - Simple vs. complex sentences
+3. **Testez avec différents contenus :**
+  - Documentation technique
+  - Écriture créative
+  - Communications professionnelles
+  - Phrases simples vs. complexes
 
-Each experiment will help you understand how system prompts, model selection, and prompt engineering work together to create effective AI agents.
+Chaque expérience vous aidera à comprendre comment les system prompts, la sélection de model et le prompt engineering fonctionnent ensemble pour créer des agents IA efficaces.
