@@ -1,272 +1,272 @@
 # AI Agents From Scratch
 
-Learn to build AI agents locally without frameworks. Understand what happens under the hood before using production frameworks.
+Apprenez à construire des AI agents en local, sans framework. Comprenez ce qui se passe sous le capot avant d'utiliser des frameworks de production.
 
-![Agent architecture overview](diagrams/agent-architecture.png)
+![Vue d'ensemble de l'architecture des agents](diagrams/agent-architecture.png)
 
 
-## Purpose
+## Objectif
 
-This repository teaches you to build AI agents from first principles using **local LLMs** and **node-llama-cpp**. By working through these examples, you'll understand:
+Ce dépôt vous enseigne à construire des AI agents à partir des principes fondamentaux en utilisant des **LLMs locaux** et **node-llama-cpp**. En suivant ces exemples, vous comprendrez :
 
-- How LLMs work at a fundamental level
-- What agents really are (LLM + tools + patterns)
-- How different agent architectures function
-- Why frameworks make certain design choices
+- Comment fonctionnent les LLMs au niveau fondamental
+- Ce que sont réellement les agents (LLM + outils + patterns)
+- Comment fonctionnent les différentes architectures d'agents
+- Pourquoi les frameworks font certains choix de conception
 
-> A Python version of this tutorial is available here:
+> Une version Python de ce tutoriel est disponible ici :
 > https://github.com/pguso/agents-from-scratch
 
-**Philosophy**: Learn by building. Understand deeply, then use frameworks wisely.
+**Philosophie** : Apprendre en construisant. Comprendre en profondeur, puis utiliser les frameworks en toute connaissance de cause.
 
-## Companion Website 
+## Site compagnon
 
-This repository now has a **matching companion website**:
+Ce dépôt dispose désormais d'un **site compagnon correspondant** :
 
 **https://agentsfromscratch.com**
 
-The website is **not a replacement for this repo**, but a **conceptual companion** that:
+Le site n'est **pas un substitut à ce dépôt**, mais un **compagnon conceptuel** qui :
 
-- Explains *why* each example exists  
-- Visualizes the learning path from raw LLM calls to full agents  
-- Separates **code**, **explanations**, and **core concepts**  
-- Helps you understand agent architectures before using frameworks  
+- Explique *pourquoi* chaque exemple existe
+- Visualise le chemin d'apprentissage, des appels LLM bruts aux agents complets
+- Sépare le **code**, les **explications** et les **concepts clés**
+- Vous aide à comprendre les architectures d'agents avant d'utiliser des frameworks
 
-**Recommended workflow:**
-- Use **GitHub** for running, modifying, and studying the code  
-- Use the **website** for mental models, explanations, and progression  
+**Workflow recommandé :**
+- Utilisez **GitHub** pour exécuter, modifier et étudier le code
+- Utilisez le **site** pour les modèles mentaux, les explications et la progression
 
-> Think of the site as the *map* and this repo as the *terrain*.
+> Considérez le site comme la *carte* et ce dépôt comme le *terrain*.
 
-## Agent Fundamentals - From LLMs to ReAct
+## Fondamentaux des Agents - Des LLMs au ReAct
 
-### Prerequisites
+### Prérequis
 - Node.js 18+
-- At least 8GB RAM (16GB recommended)
-- Download models and place in `./models/` folder, details in [DOWNLOAD.md](DOWNLOAD.md)
+- Au moins 8 Go de RAM (16 Go recommandés)
+- Téléchargez les models et placez-les dans le dossier `./models/`, détails dans [DOWNLOAD.md](DOWNLOAD.md)
 
 ### Installation
 ```bash
 npm install
 ```
 
-### Run Examples
+### Exécuter les exemples
 ```bash
 node intro/intro.js
 node simple-agent/simple-agent.js
 node react-agent/react-agent.js
 ```
 
-## Learning Path
+## Parcours d'Apprentissage
 
-Follow these examples in order to build understanding progressively:
+Suivez ces exemples dans l'ordre pour construire votre compréhension progressivement :
 
-### 1. **Introduction** - Basic LLM Interaction
-`intro/` | [Code](examples/01_intro/intro.js) | [Code Explanation](examples/01_intro/CODE.md) | [Concepts](examples/01_intro/CONCEPT.md)
+### 1. **Introduction** - Interaction de base avec un LLM
+`intro/` | [Code](examples/01_intro/intro.js) | [Explication du code](examples/01_intro/CODE.md) | [Concepts](examples/01_intro/CONCEPT.md)
 
-**What you'll learn:**
-- Loading and running a local LLM
-- Basic prompt/response cycle
+**Ce que vous apprendrez :**
+- Charger et exécuter un LLM local
+- Cycle de base prompt / response
 
-**Key concepts**: Model loading, context, inference pipeline, token generation
-
----
-
-### 2. (Optional) **OpenAI Intro** - Using Proprietary Models
-`openai-intro/` | [Code](examples/02_openai-intro/openai-intro.js) | [Code Explanation](examples/02_openai-intro/CODE.md) | [Concepts](examples/02_openai-intro/CONCEPT.md)
-
-**What you'll learn:**
-- How to call hosted LLMs (like GPT-4)
-- Temperature Control
-- Token Usage
-
-**Key concepts**: Inference endpoints, network latency, cost vs control, data privacy, vendor dependence
+**Concepts clés** : Chargement de model, context, pipeline d'inference, génération de tokens
 
 ---
 
-### 3. **Translation** - System Prompts & Specialization
-`translation/` | [Code](examples/03_translation/translation.js) | [Code Explanation](examples/03_translation/CODE.md) | [Concepts](examples/03_translation/CONCEPT.md)
+### 2. (Optionnel) **OpenAI Intro** - Utilisation de models propriétaires
+`openai-intro/` | [Code](examples/02_openai-intro/openai-intro.js) | [Explication du code](examples/02_openai-intro/CODE.md) | [Concepts](examples/02_openai-intro/CONCEPT.md)
 
-**What you'll learn:**
-- Using system prompts to specialize agents
-- Output format control
-- Role-based behavior
-- Chat wrappers for different models
+**Ce que vous apprendrez :**
+- Comment appeler des LLMs hébergés (comme GPT-4)
+- Contrôle de la température
+- Utilisation des tokens
 
-**Key concepts**: System prompts, agent specialization, behavioral constraints, prompt engineering
-
----
-
-### 4. **Think** - Reasoning & Problem Solving
-`think/` | [Code](examples/04_think/think.js) | [Code Explanation](examples/04_think/CODE.md) | [Concepts](examples/04_think/CONCEPT.md)
-
-**What you'll learn:**
-- Configuring LLMs for logical reasoning
-- Complex quantitative problems
-- Limitations of pure LLM reasoning
-- When to use external tools
-
-**Key concepts**: Reasoning agents, problem decomposition, cognitive tasks, reasoning limitations
+**Concepts clés** : Endpoints d'inference, latence réseau, coût vs contrôle, confidentialité des données, dépendance aux fournisseurs
 
 ---
 
-### 5. **Batch** - Parallel Processing
-`batch/` | [Code](examples/05_batch/batch.js) | [Code Explanation](examples/05_batch/CODE.md) | [Concepts](examples/05_batch/CONCEPT.md)
+### 3. **Translation** - System Prompts & Spécialisation
+`translation/` | [Code](examples/03_translation/translation.js) | [Explication du code](examples/03_translation/CODE.md) | [Concepts](examples/03_translation/CONCEPT.md)
 
-**What you'll learn:**
-- Processing multiple requests concurrently
-- Context sequences for parallelism
-- GPU batch processing
-- Performance optimization
+**Ce que vous apprendrez :**
+- Utiliser des system prompts pour spécialiser les agents
+- Contrôle du format de sortie
+- Comportement basé sur le rôle
+- Wrappers de chat pour différents models
 
-**Key concepts**: Parallel execution, sequences, batch size, throughput optimization
-
----
-
-### 6. **Coding** - Streaming & Response Control
-`coding/` | [Code](examples/06_coding/coding.js) | [Code Explanation](examples/06_coding/CODE.md) | [Concepts](examples/06_coding/CONCEPT.md)
-
-**What you'll learn:**
-- Real-time streaming responses
-- Token limits and budget management
-- Progressive output display
-- User experience optimization
-
-**Key concepts**: Streaming, token-by-token generation, response control, real-time feedback
+**Concepts clés** : System prompts, spécialisation des agents, contraintes comportementales, prompt engineering
 
 ---
 
-### 7. **Simple Agent** - Function Calling (Tools)
-`simple-agent/` | [Code](examples/07_simple-agent/simple-agent.js) | [Code Explanation](examples/07_simple-agent/CODE.md) | [Concepts](examples/07_simple-agent/CONCEPT.md)
+### 4. **Think** - Raisonnement & Résolution de problèmes
+`think/` | [Code](examples/04_think/think.js) | [Explication du code](examples/04_think/CODE.md) | [Concepts](examples/04_think/CONCEPT.md)
 
-**What you'll learn:**
-- Function calling / tool use fundamentals
-- Defining tools the LLM can use
-- JSON Schema for parameters
-- How LLMs decide when to use tools
+**Ce que vous apprendrez :**
+- Configurer les LLMs pour le raisonnement logique
+- Problèmes quantitatifs complexes
+- Limites du raisonnement pur des LLMs
+- Quand utiliser des outils externes
 
-**Key concepts**: Function calling, tool definitions, agent decision making, action-taking
-
-**This is where text generation becomes agency!**
+**Concepts clés** : Agents de raisonnement, décomposition de problèmes, tâches cognitives, limites du raisonnement
 
 ---
 
-### 8. **Simple Agent with Memory** - Persistent State
-`simple-agent-with-memory/` | [Code](examples/08_simple-agent-with-memory/simple-agent-with-memory.js) | [Code Explanation](examples/08_simple-agent-with-memory/CODE.md) | [Concepts](examples/08_simple-agent-with-memory/CONCEPT.md)
+### 5. **Batch** - Traitement parallèle
+`batch/` | [Code](examples/05_batch/batch.js) | [Explication du code](examples/05_batch/CODE.md) | [Concepts](examples/05_batch/CONCEPT.md)
 
-**What you'll learn:**
-- Persisting information across sessions
-- Long-term memory management
-- Facts and preferences storage
-- Memory retrieval strategies
+**Ce que vous apprendrez :**
+- Traiter plusieurs requêtes simultanément
+- Séquences de contexte pour le parallélisme
+- Traitement batch sur GPU
+- Optimisation des performances
 
-**Key concepts**: Persistent memory, state management, memory systems, context augmentation
-
----
-
-### 9. **ReAct Agent** - Reasoning + Acting
-`react-agent/` | [Code](examples/09_react-agent/react-agent.js) | [Code Explanation](examples/09_react-agent/CODE.md) | [Concepts](examples/09_react-agent/CONCEPT.md)
-
-**What you'll learn:**
-- ReAct pattern (Reason → Act → Observe)
-- Iterative problem solving
-- Step-by-step tool use
-- Self-correction loops
-
-**Key concepts**: ReAct pattern, iterative reasoning, observation-action cycles, multi-step agents
-
-**This is the foundation of modern agent frameworks!**
+**Concepts clés** : Exécution parallèle, séquences, batch size, optimisation du throughput
 
 ---
 
-### 10. **AoT Agent** - Atom of Thought Planning
-`aot-agent/` | [Code](examples/10_aot-agent/aot-agent.js) | [Code Explanation](examples/10_aot-agent/CODE.md) | [Concepts](examples/10_aot-agent/CONCEPT.md)
+### 6. **Coding** - Streaming & Contrôle des réponses
+`coding/` | [Code](examples/06_coding/coding.js) | [Explication du code](examples/06_coding/CODE.md) | [Concepts](examples/06_coding/CONCEPT.md)
 
-**What you'll learn:**
-- Atom of Thought methodology
-- Atomic planning for multi-step computations
-- Dependency management between operations
-- Structured JSON output for reasoning plans
-- Deterministic execution of plans
+**Ce que vous apprendrez :**
+- Réponses en streaming en temps réel
+- Limites de tokens et gestion du budget
+- Affichage progressif des sorties
+- Optimisation de l'expérience utilisateur
 
-**Key concepts**: AoT planning, atomic operations, dependency resolution, plan validation, structured reasoning
-
----
-
-### 11. **Error Handling** - Resilience for LLM + Tools
-`error-handling/` | [Code](examples/11_error-handling/error-handling.js) | [Code Explanation](examples/11_error-handling/CODE.md) | [Concepts](examples/11_error-handling/CONCEPT.md)
-
-**What you'll learn:**
-- Typed error taxonomy (validation, LLM, tools, workflow) with stable codes
-- Timeouts, retries with backoff/jitter, and classifying transient failures
-- Graceful degradation when the LLM path fails (deterministic tool fallback)
-- Orchestration-level errors (`AgentWorkflowError`) and correlation ids for support
-
-**Key concepts**: Error taxonomy, retry policies, timeouts, fallbacks, degraded mode, observability, user-safe messaging
+**Concepts clés** : Streaming, génération token par token, contrôle des réponses, feedback en temps réel
 
 ---
 
-### 12. **Tree of Thought** - Search over reasoning branches
-`tree-of-thought/` | [Code](examples/12_tree-of-thought/tree-of-thought.js) | [Code Explanation](examples/12_tree-of-thought/CODE.md) | [Concepts](examples/12_tree-of-thought/CONCEPT.md)
+### 7. **Simple Agent** - Function Calling (Outils)
+`simple-agent/` | [Code](examples/07_simple-agent/simple-agent.js) | [Explication du code](examples/07_simple-agent/CODE.md) | [Concepts](examples/07_simple-agent/CONCEPT.md)
 
-**What you'll learn:**
-- Generating multiple candidate next actions from the same partial plan
-- Ranking and pruning branches with a deterministic score in code
-- Running a compact beam search loop with inspectable kept/pruned decisions
-- Verifying the winning path with explicit sanity checks
+**Ce que vous apprendrez :**
+- Fonctionnement du function calling / utilisation d'outils
+- Définir des outils que le LLM peut utiliser
+- JSON Schema pour les paramètres
+- Comment les LLMs décident quand utiliser des outils
 
-**Key concepts**: Tree of Thought, beam search, branch pruning, verifiable objectives, search controllers
+**Concepts clés** : Function calling, définitions d'outils, prise de décision par l'agent, capacité d'action
 
----
-
-### 13. **Graph of Thought** - DAG merge for multi-source outputs
-`graph-of-thought/` | [Code](examples/13_graph-of-thought/graph-of-thought.js) | [Code Explanation](examples/13_graph-of-thought/CODE.md) | [Concepts](examples/13_graph-of-thought/CONCEPT.md)
-
-**What you'll learn:**
-- Modeling reasoning as a DAG: parallel source extracts → merge rules → final draft
-- Resolving conflicts explicitly before generation (`must_include`, `must_avoid`, `conflict_notes`)
-- Adding deterministic merge and draft compliance checks
-- Running independent nodes in parallel to reduce latency
-
-**Key concepts**: Graph of Thought, DAG orchestration, multi-source fusion, merge-before-generate, policy reconciliation
-
-**Decision guide**: use ToT when you need to search competing paths; use GoT when you need to combine multiple sources into one consistent policy. Compare both in:
-- [ToT concept](examples/12_tree-of-thought/CONCEPT.md)
-- [GoT concept](examples/13_graph-of-thought/CONCEPT.md)
+**C'est ici que la génération de texte devient de l'agence !**
 
 ---
 
-### 14. **Chain of Thought** - Auditable stepwise decisioning
-`chain-of-thought/` | [Code](examples/14_chain-of-thought/chain-of-thought.js) | [Code Explanation](examples/14_chain-of-thought/CODE.md) | [Concepts](examples/14_chain-of-thought/CONCEPT.md)
+### 8. **Simple Agent with Memory** - État persistant
+`simple-agent-with-memory/` | [Code](examples/08_simple-agent-with-memory/simple-agent-with-memory.js) | [Explication du code](examples/08_simple-agent-with-memory/CODE.md) | [Concepts](examples/08_simple-agent-with-memory/CONCEPT.md)
 
-**What you'll learn:**
-- Splitting a high-stakes decision into explicit reasoning phases
-- Preventing early bias with a facts-only extraction step
-- Balancing fraud signals with legitimacy evidence before policy application
-- Producing an auditable final decision with customer-safe and internal outputs
+**Ce que vous apprendrez :**
+- Persister des informations entre les sessions
+- Gestion de la mémoire à long terme
+- Stockage de faits et de préférences
+- Stratégies de récupération en mémoire
 
-**Key concepts**: Chain of Thought, structured reasoning traces, policy-constrained decisions, explainability, review-ready workflows
+**Concepts clés** : Mémoire persistante, gestion d'état, systèmes de mémoire, augmentation du contexte
 
 ---
 
-## Documentation Structure
+### 9. **ReAct Agent** - Raisonnement + Action
+`react-agent/` | [Code](examples/09_react-agent/react-agent.js) | [Explication du code](examples/09_react-agent/CODE.md) | [Concepts](examples/09_react-agent/CONCEPT.md)
 
-Each example folder contains:
+**Ce que vous apprendrez :**
+- Pattern ReAct (Reason → Act → Observe)
+- Résolution itérative de problèmes
+- Utilisation d'outils étape par étape
+- Boucles de correction automatique
 
-- **`<name>.js`** - The working code example
-- **`CODE.md`** - Step-by-step code explanation
-- Line-by-line breakdowns
-- What each part does
-- How it works
-- **`CONCEPT.md`** - High-level concepts
-- Why it matters for agents
-- Architectural patterns
-- Real-world applications
-- Simple diagrams
+**Concepts clés** : Pattern ReAct, raisonnement itératif, cycles observation-action, agents multi-étapes
 
-## Core Concepts
+**C'est la base des frameworks d'agents modernes !**
 
-### What is an AI Agent?
+---
+
+### 10. **AoT Agent** - Planification par Atom of Thought
+`aot-agent/` | [Code](examples/10_aot-agent/aot-agent.js) | [Explication du code](examples/10_aot-agent/CODE.md) | [Concepts](examples/10_aot-agent/CONCEPT.md)
+
+**Ce que vous apprendrez :**
+- Méthodologie Atom of Thought
+- Planification atomique pour les calculs multi-étapes
+- Gestion des dépendances entre les opérations
+- Sorties JSON structurées pour les plans de raisonnement
+- Exécution déterministe des plans
+
+**Concepts clés** : Planification AoT, opérations atomiques, résolution de dépendances, validation de plans, raisonnement structuré
+
+---
+
+### 11. **Error Handling** - Résilience pour LLM + Outils
+`error-handling/` | [Code](examples/11_error-handling/error-handling.js) | [Explication du code](examples/11_error-handling/CODE.md) | [Concepts](examples/11_error-handling/CONCEPT.md)
+
+**Ce que vous apprendrez :**
+- Taxonomie typée des erreurs (validation, LLM, outils, workflow) avec des codes stables
+- Timeouts, retries avec backoff/jitter, et classification des pannes transitoires
+- Dégradation gracieuse quand le chemin LLM échoue (fallback d'outil déterministe)
+- Erreurs au niveau orchestration (`AgentWorkflowError`) et correlation IDs pour le support
+
+**Concepts clés** : Taxonomie des erreurs, politiques de retry, timeouts, fallbacks, mode dégradé, observabilité, messages sécurisés pour l'utilisateur
+
+---
+
+### 12. **Tree of Thought** - Recherche sur les branches de raisonnement
+`tree-of-thought/` | [Code](examples/12_tree-of-thought/tree-of-thought.js) | [Explication du code](examples/12_tree-of-thought/CODE.md) | [Concepts](examples/12_tree-of-thought/CONCEPT.md)
+
+**Ce que vous apprendrez :**
+- Générer plusieurs actions candidates depuis le même plan partiel
+- Classer et élaguer les branches avec un score déterministe en code
+- Exécuter une boucle compacte de beam search avec des décisions conservées/élaguées inspectables
+- Vérifier le chemin gagnant avec des contrôles de cohérence explicites
+
+**Concepts clés** : Tree of Thought, beam search, élagage de branches, objectifs vérifiables, contrôleurs de recherche
+
+---
+
+### 13. **Graph of Thought** - Fusion DAG pour sorties multi-sources
+`graph-of-thought/` | [Code](examples/13_graph-of-thought/graph-of-thought.js) | [Explication du code](examples/13_graph-of-thought/CODE.md) | [Concepts](examples/13_graph-of-thought/CONCEPT.md)
+
+**Ce que vous apprendrez :**
+- Modéliser le raisonnement comme un DAG : extractions sources parallèles → règles de fusion → version finale
+- Résoudre les conflits explicitement avant la génération (`must_include`, `must_avoid`, `conflict_notes`)
+- Ajouter des contrôles déterministes de fusion et de conformité du draft
+- Exécuter les nœuds indépendants en parallèle pour réduire la latence
+
+**Concepts clés** : Graph of Thought, orchestration DAG, fusion multi-sources, merge-before-generate, réconciliation de politiques
+
+**Guide de décision** : utilisez ToT quand vous devez explorer des chemins concurrents ; utilisez GoT quand vous devez combiner plusieurs sources en une politique cohérente. Comparez les deux dans :
+- [Concept ToT](examples/12_tree-of-thought/CONCEPT.md)
+- [Concept GoT](examples/13_graph-of-thought/CONCEPT.md)
+
+---
+
+### 14. **Chain of Thought** - Prise de décision auditable par étapes
+`chain-of-thought/` | [Code](examples/14_chain-of-thought/chain-of-thought.js) | [Explication du code](examples/14_chain-of-thought/CODE.md) | [Concepts](examples/14_chain-of-thought/CONCEPT.md)
+
+**Ce que vous apprendrez :**
+- Diviser une décision à risque élevé en phases de raisonnement explicites
+- Prévenir le biais précoce avec une étape d'extraction de faits uniquement
+- Équilibrer les signaux de fraude avec les preuves de légitimité avant l'application des politiques
+- Produire une décision finale auditable avec des sorties adaptées au client et internes
+
+**Concepts clés** : Chain of Thought, traces de raisonnement structurées, décisions contraintes par politiques, explicabilité, workflows prêts pour relecture
+
+---
+
+## Structure de la Documentation
+
+Chaque dossier d'exemple contient :
+
+- **`<name>.js`** - L'exemple de code fonctionnel
+- **`CODE.md`** - Explication détaillée du code
+  - Analyse ligne par ligne
+  - Ce que fait chaque partie
+  - Comment ça marche
+- **`CONCEPT.md`** - Concepts de haut niveau
+  - Pourquoi c'est important pour les agents
+  - Patterns architecturaux
+  - Applications réelles
+  - Diagrammes simples
+
+## Concepts Clés
+
+### Qu'est-ce qu'un AI Agent ?
 
 ```
 AI Agent = LLM + System Prompt + Tools + Memory + Reasoning Pattern
@@ -275,64 +275,64 @@ AI Agent = LLM + System Prompt + Tools + Memory + Reasoning Pattern
          Brain      Identity    Hands   State         Strategy
 ```
 
-### Evolution of Capabilities
+### Évolution des Capacités
 
 ```
-1. intro          → Basic LLM usage
-2. translation    → Specialized behavior (system prompts)
-3. think          → Reasoning ability
-4. batch          → Parallel processing
-5. coding         → Streaming & control
-6. simple-agent   → Tool use (function calling)
-7. memory-agent   → Persistent state
-8. react-agent    → Strategic reasoning + tool use
+1. intro          → Usage de base du LLM
+2. translation    → Comportement spécialisé (system prompts)
+3. think          → Capacité de raisonnement
+4. batch          → Traitement parallèle
+5. coding         → Streaming & contrôle
+6. simple-agent   → Utilisation d'outils (function calling)
+7. memory-agent   → État persistant
+8. react-agent    → Raisonnement stratégique + utilisation d'outils
 ```
 
-### Architecture Patterns
+### Patterns Architecturaux
 
-**Simple Agent (Steps 1-5)**
+**Simple Agent (Étapes 1-5)**
 ```
 User → LLM → Response
 ```
 
-**Tool-Using Agent (Step 6)**
+**Tool-Using Agent (Étape 6)**
 ```
 User → LLM ⟷ Tools → Response
 ```
 
-**Memory Agent (Step 7)**
+**Memory Agent (Étape 7)**
 ```
 User → LLM ⟷ Tools → Response
        ↕
      Memory
 ```
 
-**ReAct Agent (Step 8)**
+**ReAct Agent (Étape 8)**
 ```
 User → LLM → Think → Act → Observe
        ↑      ↓      ↓      ↓
        └──────┴──────┴──────┘
-           Iterate until solved
+           Itérer jusqu'à résolution
 ```
 
-## ️ Helper Utilities
+## Utilitaires Helper
 
 ### PromptDebugger
 `helper/prompt-debugger.js`
 
-Utility for debugging prompts sent to the LLM. Shows exactly what the model sees, including:
+Utilitaire pour déboguer les prompts envoyés au LLM. Affiche exactement ce que le model voit, y compris :
 - System prompts
 - Function definitions
-- Conversation history
-- Context state
+- Historique de conversation
+- État du context
 
-Usage example in `simple-agent/simple-agent.js`
+Exemple d'utilisation dans `simple-agent/simple-agent.js`
 
-## ️ Project Structure - Fundamentals
+## ️ Structure du Projet - Fondamentaux
 
 ```
 ai-agents/
-├── README.md                          ← You are here
+├── README.md                          ← Vous êtes ici
 ├─ examples/
 ├── 01_intro/
 │   ├── intro.js
@@ -393,32 +393,32 @@ ai-agents/
 │   └── CONCEPT.md
 ├── helper/
 │   └── prompt-debugger.js
-├── models/                             ← Place your GGUF models here
-└── logs/                               ← Debug outputs
+├── models/                             ← Placez vos models GGUF ici
+└── logs/                               ← Sorties de debug
 ```
 
-## Additional Resources
+## Ressources Complémentaires
 
-- **node-llama-cpp**: [GitHub](https://github.com/withcatai/node-llama-cpp)
-- **Model Hub**: [Hugging Face](https://huggingface.co/models?library=gguf)
-- **GGUF Format**: Quantized models for local inference
+- **node-llama-cpp** : [GitHub](https://github.com/withcatai/node-llama-cpp)
+- **Model Hub** : [Hugging Face](https://huggingface.co/models?library=gguf)
+- **Format GGUF** : Models quantifiés pour l'inference locale
 
-## Contributing
+## Contribuer
 
-This is a learning resource. Feel free to:
-- Suggest improvements to documentation
-- Add more example patterns
-- Fix bugs or unclear explanations
-- Share what you built!
+Il s'agit d'une ressource éducative. N'hésitez pas à :
+- Suggérer des améliorations à la documentation
+- Ajouter d'autres patterns d'exemples
+- Corriger des bugs ou des explications floues
+- Partager ce que vous avez construit !
 
-## License
+## Licence
 
-Educational resource - use and modify as needed for learning.
+Ressource éducative - utilisez et modifiez selon vos besoins pour l'apprentissage.
 
 ---
 
-**Built with ❤️ for people who want to truly understand AI agents**
+**Construit avec ❤️ pour ceux qui veulent vraiment comprendre les AI agents**
 
-Start with `intro/` and work your way through. Each example builds on the previous one. Read both CODE.md and CONCEPT.md for full understanding.
+Commencez par `intro/` et progressez étape par étape. Chaque exemple s'appuie sur le précédent. Lisez à la fois CODE.md et CONCEPT.md pour une compréhension complète.
 
-Happy learning! 
+Bon apprentissage ! 
