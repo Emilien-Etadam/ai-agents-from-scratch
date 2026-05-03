@@ -1,138 +1,138 @@
-# Concept: System Prompts & Agent Specialization
+# Concept : System Prompts et Spécialisation d'Agents
 
-## Overview
+## Vue d'Ensemble
 
-This example demonstrates how to transform a general-purpose LLM into a **specialized agent** using **system prompts**. The key insight: you don't need different models for different tasks—you need different instructions.
+Cet exemple démontre comment transformer un LLM généraliste en un **agent spécialisé** à l'aide de **system prompts**. L'insight clé : vous n'avez pas besoin de models différents pour des tâches différentes — vous avez besoin d'instructions différentes.
 
-## What is a System Prompt?
+## Qu'est-ce qu'un System Prompt ?
 
-A **system prompt** is a persistent instruction that shapes the AI's behavior for an entire conversation session.
+Un **system prompt** est une instruction persistante qui façonne le comportement de l'IA pour toute une session de conversation.
 
-### Analogy
-Think of hiring someone for a job:
+### Analogie
+Pensez à recruer quelqu'un pour un poste :
 
 ```
-Without System Prompt          With System Prompt
+Sans System Prompt             Avec System Prompt
 ─────────────────────         ──────────────────────
-"Hi, I'm an AI."              "I'm a professional translator
-                               with expertise in scientific
-"What can I do for you?"            German. I follow strict quality
-                              guidelines and output format."
+"Salut, je suis une IA."      "Je suis un traducteur professionnel
+"Qu'est-ce que je peux faire ?" spécialisé en allemand scientifique.
+                               Je respecte des directives et un format
+                               de sortie stricts."
 ```
 
-## How System Prompts Work
+## Comment les System Prompts Fonctionnent
 
-### The Context Structure
+### Structure du Context
 
 ```
 ┌─────────────────────────────────────────────┐
-│           CONTEXT WINDOW                    │
+│           FENÊTRE DE CONTEXT                │
 │                                             │
 │  ┌───────────────────────────────────────┐ │
-│  │  SYSTEM PROMPT (Always present)       │ │
+│  │  SYSTEM PROMPT (Toujours présent)     │ │
 │  │  "You are a professional translator..." │
 │  │  "Follow these rules..."              │ │
 │  └───────────────────────────────────────┘ │
 │                    ↓                        │
 │  ┌───────────────────────────────────────┐ │
-│  │  USER MESSAGES                        │ │
+│  │  MESSAGES UTILISATEUR                 │ │
 │  │  "Translate this text..."             │ │
 │  └───────────────────────────────────────┘ │
 │                    ↓                        │
 │  ┌───────────────────────────────────────┐ │
-│  │  AI RESPONSES                         │ │
-│  │  (Shaped by system prompt)            │ │
+│  │  RÉPONSES IA                          │ │
+│  │  (Façonnées par le system prompt)     │ │
 │  └───────────────────────────────────────┘ │
 └─────────────────────────────────────────────┘
 ```
 
-The system prompt sits at the top of the context and influences **every** response.
+Le system prompt est au sommet du contexte et influence **chaque** réponse.
 
-## Agent Specialization Pattern
+## Pattern de Spécialisation d'Agent
 
-### Transformation Flow
+### Flux de Transformation
 
 ```
 ┌──────────────────┐    ┌─────────────────┐    ┌──────────────────┐
-│  General Model   │ +  │ System Prompt   │ =  │ Specialized Agent│
+│  Model Général   │ +  │ System Prompt   │ =  │ Agent Spécialisé │
 │                  │    │                 │    │                  │
-│ • Knows many     │    │ • Define role   │    │ • Translation    │
-│   things         │    │ • Set rules     │    │   Agent          │
-│ • No specific    │    │ • Constrain     │    │ • Coding Agent   │
-│   role           │    │   output        │    │ • Analysis Agent │
+│ • Connaît plein  │    │ • Définir rôle  │    │ • Agent          │
+│   de choses      │    │ • Poser règles  │    │   Traduction     │
+│ • Pas de rôle    │    │ • Contraindre   │    │ • Agent Codeur   │
+│   spécifique     │    │   la sortie     │    │ • Agent Analyse  │
 └──────────────────┘    └─────────────────┘    └──────────────────┘
 ```
 
-### Example Specializations
+### Exemples de Spécialisation
 
-**Translation Agent (this example):**
+**Agent Traduction (cet exemple) :**
 ```
-System Prompt = Role + Rules + Output Format
+System Prompt = Rôle + Règles + Format de Sortie
 ```
 
-**Code Assistant:**
+**Assistant Code :**
 ```javascript
-systemPrompt: "You are an expert programmer. 
+systemPrompt: "You are an expert programmer.
 Always provide working code with comments.
 Explain complex logic."
 ```
 
-**Data Analyst:**
+**Analyste de Données :**
 ```javascript
 systemPrompt: "You are a data analyst.
 Always show your calculations step-by-step.
 Cite data sources when available."
 ```
 
-## Anatomy of an Effective System Prompt
+## Anatomie d'un System Prompt Efficace
 
-### The 5 Components
+### Les 5 Composants
 
 ```
 ┌─────────────────────────────────────────┐
-│  1. ROLE DEFINITION                     │
-│  "You are a [specific role]..."         │
+│  1. DÉFINITION DU RÔLE                   │
+│  "You are a [rôle spécifique]..."       │
 ├─────────────────────────────────────────┤
-│  2. TASK DESCRIPTION                    │
+│  2. DESCRIPTION DE LA TÂCHE              │
 │  "Your goal is to..."                   │
 ├─────────────────────────────────────────┤
-│  3. BEHAVIORAL RULES                    │
+│  3. RÈGES COMPORTIMENTALES               │
 │  "Always do X, Never do Y..."           │
 ├─────────────────────────────────────────┤
-│  4. OUTPUT FORMAT                       │
+│  4. FORMAT DE SORTIE                    │
 │  "Format your response as..."           │
 ├─────────────────────────────────────────┤
-│  5. CONSTRAINTS                         │
+│  5. CONTRAINTES                         │
 │  "Do NOT include..."                    │
 └─────────────────────────────────────────┘
 ```
 
-### This Example's Structure
+### Structure de cet Exemple
 
 ```
-Role:        "Professional scientific translator"
-Task:        "Translate English to German with precision"
-Rules:       8 specific translation guidelines
-Format:      Idiomatic German, scientific style
-Constraints: "ONLY translated text, no explanation"
+Rôle :        "Traducteur scientifique professionnel"
+Tâche :       "Traduire l'anglais vers l'allemand avec précision"
+Règles :      8 directives de traduction spécifiques
+Format :      Allemand idiomatique, style scientifique
+Contraintes : "UNIQUEMENT le texte traduit, aucune explication"
 ```
 
-## Why Detailed System Prompts Matter
+## Pourquoi les System Prompts Détaillés Comptent
 
-### Comparison Study
+### Étude Comparative
 
-**Minimal System Prompt:**
+**System Prompt Minimal :**
 ```javascript
 systemPrompt: "Translate to German"
 ```
 
-**Result:**
-- May add unnecessary explanations
-- Inconsistent terminology
-- Mixed formality levels
-- Extra conversational text
+**Résultat :**
+- Peut ajouter des explications inutiles
+- Terminologie incohérente
+- Niveaux de formalité mélangés
+- Texte conversationnel supplémentaire
 
-**Detailed System Prompt (this example):**
+**System Prompt Détaillé (cet exemple) :**
 ```javascript
 systemPrompt: `You are a professional translator...
 - Rule 1: Preserve technical accuracy
@@ -142,41 +142,41 @@ systemPrompt: `You are a professional translator...
 DO NOT add any explanations`
 ```
 
-**Result:**
-- ✅ Consistent quality
-- ✅ Correct terminology
-- ✅ Proper formatting
-- ✅ Only translation output
+**Résultat :**
+- ✅ Qualité cohérente
+- ✅ Terminologie correcte
+- ✅ Formatage approprié
+- ✅ Uniquement la traduction en sortie
 
-### Quality Impact
+### Impact sur la Qualité
 
 ```
-Detail Level          Output Quality
-───────────         ─────────────────
-Very minimal  →     Unpredictable
-Basic role    →     Somewhat consistent
-Detailed      →     Highly consistent ⭐
-Over-detailed →     May confuse model
+Niveau de Détail           Qualité de Sortie
+───────────               ─────────────────
+Très minimal   →         Imprévisible
+Rôle de base   →         Assez cohérent
+Détaillé       →         Très cohérent ⭐
+Trop détaillé  →         Peut confondre le model
 ```
 
-## System Prompt Design Patterns
+## Patterns de Conception de System Prompt
 
-### Pattern 1: Role-Playing
+### Pattern 1 : Role-Playing
 ```
 "You are a [profession] with expertise in [domain]..."
 ```
-Makes the model adopt that perspective.
+Amène le model à adopter cette perspective.
 
-### Pattern 2: Rule-Based
+### Pattern 2 : Rule-Based
 ```
 "Follow these rules:
 1. Always...
 2. Never...
 3. When X, do Y..."
 ```
-Explicit constraints lead to predictable behavior.
+Des contraintes explicites conduisent à un comportement prévisible.
 
-### Pattern 3: Output Formatting
+### Pattern 3 : Formatage de Sortie
 ```
 "Format your response as:
 - JSON
@@ -184,119 +184,119 @@ Explicit constraints lead to predictable behavior.
 - Plain text only
 - Step-by-step list"
 ```
-Controls the structure of responses.
+Contrôle la structure des réponses.
 
-### Pattern 4: Contextual Awareness
+### Pattern 4 : Conscience Contextuelle
 ```
 "You remember: [previous facts]
 You know that: [domain knowledge]
 Current situation: [context]"
 ```
-Primes the model with relevant information.
+Prépare le model avec des informations pertinentes.
 
-## How This Relates to AI Agents
+## Comment Cela se Relie aux AI Agents
 
-### Agent = Model + System Prompt + Tools
+### Agent = Model + System Prompt + Outils
 
 ```
 ┌────────────────────────────────────────────┐
 │             AI Agent                       │
 │                                            │
 │  ┌──────────────────────────────────────┐ │
-│  │  System Prompt (Agent's "Identity")  │ │
+│  │  System Prompt ("Identité" Agent)    │ │
 │  └──────────────────────────────────────┘ │
 │                  ↓                         │
 │  ┌──────────────────────────────────────┐ │
-│  │  LLM (Agent's "Brain")               │ │
+│  │  LLM ("Cerveau" Agent)               │ │
 │  └──────────────────────────────────────┘ │
 │                  ↓                         │
 │  ┌──────────────────────────────────────┐ │
-│  │  Tools (Agent's "Hands") [Optional]  │ │
+│  │  Outils ("Mains" Agent) [Optionnel]  │ │
 │  └──────────────────────────────────────┘ │
 └────────────────────────────────────────────┘
 ```
 
-**In this example:**
-- System Prompt: "You are a translator..."
-- LLM: Apertus-8B model
-- Tools: None (translation is done by the model itself)
+**Dans cet exemple :**
+- System Prompt : "You are a translator..."
+- LLM : Model Apertus-8B
+- Outils : Aucun (la traduction est faite par le model lui-même)
 
-**In more complex agents:**
-- System Prompt: "You are a research assistant..."
-- LLM: Any model
-- Tools: Web search, calculator, file access, etc.
+**Dans des agents plus complexes :**
+- System Prompt : "You are a research assistant..."
+- LLM : N'importe quel model
+- Outils : Recherche web, calculatrice, accès fichiers, etc.
 
-## Practical Applications
+## Applications Pratiques
 
-### 1. Domain Specialization
+### 1. Spécialisation Domainale
 ```
-Medical → "You are a medical professional..."
-Legal → "You are a legal expert..."
-Technical → "You are an engineer..."
+Médical → "You are a medical professional..."
+Juridique → "You are a legal expert..."
+Technique → "You are an engineer..."
 ```
 
-### 2. Output Control
+### 2. Contrôle de Sortie
 ```
-JSON API → "Always respond in valid JSON"
+API JSON → "Always respond in valid JSON"
 Markdown → "Format all responses as markdown"
 Code → "Only output executable code"
 ```
 
-### 3. Behavioral Constraints
+### 3. Contraintes Comportementales
 ```
-Concise → "Use maximum 2 sentences"
-Detailed → "Explain thoroughly with examples"
-Neutral → "Avoid opinions, state only facts"
+Concis → "Use maximum 2 sentences"
+Détaillé → "Explain thoroughly with examples"
+Neutre → "Avoid opinions, state only facts"
 ```
 
-### 4. Multi-Language Support
+### 4. Support Multi-Langue
 ```
 systemPrompt: `You are a multilingual assistant.
 Respond in the same language as the input.`
 ```
 
-## Chat Wrappers Explained
+## Wrappers de Chat Expliqués
 
-Different models need different conversation formats:
+Les différents models nécessitent des formats de conversation différents :
 
 ```
-Model Type        Format Needed         Wrapper
-──────────────   ───────────────────   ─────────────────
-Llama 2/3        Llama format          LlamaChatWrapper
-GPT-style        ChatML format         ChatMLWrapper
-Harmony models   Harmony format        HarmonyChatWrapper
+Type de Model        Format Requis         Wrapper
+──────────────       ───────────────────   ─────────────────
+Llama 2/3           Format Llama          LlamaChatWrapper
+Style GPT           Format ChatML         ChatMLWrapper
+Models Harmony      Format Harmony        HarmonyChatWrapper
 ```
 
-**What they do:**
+**Ce qu'ils font :**
 ```
-Your Message → [Chat Wrapper] → Formatted Prompt → Model
+Votre Message → [Chat Wrapper] → Prompt Formaté → Model
                     ↓
-          Adds special tokens:
+          Ajoute des tokens spéciaux :
           <|system|>, <|user|>, <|assistant|>
 ```
 
-The wrapper ensures the model understands which part is the system prompt, which is the user message, etc.
+Le wrapper garantit que le model comprend quelle partie est le system prompt, quelle est le message utilisateur, etc.
 
-## Key Takeaways
+## Points Clés
 
-1. **System prompts are powerful**: They fundamentally change how the model behaves
-2. **Detailed is better**: More specific instructions = more consistent results
-3. **Structure matters**: Role + Rules + Format + Constraints
-4. **No retraining needed**: Same model, different behaviors
-5. **Foundation for agents**: System prompts are the first step in building specialized agents
+1. **Les system prompts sont puissants** : Ils changent fondamentalement comment le model se comporte
+2. **Le détail est mieux** : Instructions plus spécifiques = résultats plus cohérents
+3. **La structure compte** : Rôle + Règles + Format + Contraintes
+4. **Pas besoin de retrain** : Même model, comportements différents
+5. **Fondation des agents** : Les system prompts sont la première étape pour construire des agents spécialisés
 
-## Evolution Path
+## Parcours d'Évolution
 
 ```
-1. Basic Prompting           (intro.js)
+1. Prompting de Base           (intro.js)
        ↓
-2. System Prompts            (translation.js) ← You are here
+2. System Prompts              (translation.js) ← Vous êtes ici
        ↓
-3. System Prompts + Tools    (simple-agent.js)
+3. System Prompts + Outils     (simple-agent.js)
        ↓
-4. Multi-turn reasoning      (react-agent.js)
+4. Raisonnement multi-tours    (react-agent.js)
        ↓
-5. Full Agent Systems
+5. Systèmes Agents Complets
 ```
 
-This example bridges the gap between basic LLM usage and true agent behavior by showing how to specialize through instructions.
+Cet exemple fait le pont entre l'usage basique des LLMs et le vrai comportement d'agent en montrant comment se spécialiser par des instructions.
