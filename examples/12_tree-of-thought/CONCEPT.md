@@ -1,97 +1,97 @@
-## Tree of Thought: Motivation analysis of a person
+## Tree of Thought : Analyse de motivation d'une personne
 
-**Idea:** A person shows puzzling behavior. The agent explores multiple psychological explanations in parallel, scores them, and expands only the strongest hypothesis into the final analysis.
+**Idée :** Une personne montre un comportement puzzle. L'agent explore multiple explications psychologiques en parallel, les score, et expand uniquement l'hypothèse la plus forte en analyse finale.
 
 ---
 
-### Visual tree
+### Arbre visuel
 
 ```text
-[Behavior: "Person leaves secure job without a clear plan"]
+[Comportement : "Personne quitte un emploi sécurisé sans plan clair"]
          |
-    [Phase 1: Branch - 4 hypotheses]
+    [Phase 1 : Branch - 4 hypothèses]
     /        |         |        \
-[Avoidance][Burnout][Growth][External pressure]
+[Évitement][Burnout][Croissance][Pression externe]
     |         |          |            |
-[Phase 2: Score]
+[Phase 2 : Score]
    6         9          7            4
              |
-      [Phase 3: Prune - losers removed]
+      [Phase 3 : Prune - perdants retirés]
              |
- [Phase 4: Conclusion from ONLY Burnout]
+ [Phase 4 : Conclusion depuis UNIQUEMENT Burnout]
 ```
 
 ---
 
-### What Example 12 demonstrates
+### Ce que l'Exemple 12 démontre
 
-1. **Branch:** Build four competing psychological hypotheses.
-2. **Score:** Evaluate each hypothesis independently.
-3. **Prune:** Keep only the highest-scoring branch.
-4. **Conclusion:** Produce a final analysis from the winner only.
+1. **Branch :** Construire quatre hypothèses psychologiques concurrentes.
+2. **Score :** Évaluer chaque hypothèse indépendamment.
+3. **Prune :** Garder uniquement la branche au score le plus élevé.
+4. **Conclusion :** Produire une analyse finale depuis le winner uniquement.
 
-This intentionally highlights both ToT's strength (structured exploration) and weakness (information loss after pruning).
+Cela met intentionnellement en lumière la force du ToT (exploration structurée) et sa faiblesse (perte d'information après pruning).
 
 ---
 
-### The three core principles in code
+### Les trois principes fondamentaux dans le code
 
-| Principle | What happens in code |
+| Principe | Ce qui se passe dans le code |
 |---|---|
-| Branching | `developHypothesis()` creates one hypothesis per lens |
-| Evaluation | `scoreHypothesis()` scores each hypothesis |
-| Pruning | `pruneHypotheses()` discards all non-winners |
+| Branching | `developHypothesis()` crée une hypothèse par lens |
+| Évaluation | `scoreHypothesis()` score chaque hypothèse |
+| Pruning | `pruneHypotheses()` élimine tous les non-winners |
 
 ---
 
-### Structural downside shown explicitly
+### Désavantage structurel montré explicitement
 
-At the end, the console prints what got discarded.  
-Those branches may contain corrective insights, but they do not influence the final conclusion anymore.
+À la fin, la console affiche ce qui a été éliminé.
+Ces branches peuvent contenir des insights correctifs, mais elles n'influencent plus la conclusion finale.
 
-That is the core limitation of strict ToT pruning.
+C'est la limitation fondamentale du pruning ToT strict.
 
 ---
 
-### When to use ToT in real work
+### Quand utiliser le ToT dans le travail réel
 
-Use Tree of Thought when you need a clear winner and a simple decision path.
+Utiliser le Tree of Thought quand on a besoin d'un winner clair et d'un chemin de décision simple.
 
-#### System admin mental model
+#### Mental model d'un System Admin
 
-You get a production alert: API latency jumped from 200 ms to 2 s after a release.
+On reçoit une alerte production : la latence API est passée de 200 ms à 2 s après un release.
 
-- **Branches:** DB saturation, cache miss storm, or noisy-neighbor network issue.
-- **Score:** Each branch gets evidence-based scoring from dashboards and logs.
-- **Prune:** Pick the highest-confidence cause (for example cache collapse).
-- **Act:** Run one remediation path first (for example emergency cache warmup + TTL rollback).
+- **Branches :** Saturation DB, tempête de cache miss, ou problème réseau noisy-neighbor.
+- **Score :** Chaque branche reçoit un scoring basé sur les preuves des dashboards et logs.
+- **Prune :** Choisir la cause la plus confiante (par exemple cache collapse).
+- **Act :** Exécuter un chemin de remediation en premier (par exemple cache warmup d'urgence + rollback TTL).
 
-Why ToT fits: incident response often needs one fast, auditable decision path instead of maintaining many parallel remediation tracks.
+Pourquoi le ToT fit : la réponse à incident nécessite souvent un chemin de décision rapide et auditable au lieu de maintenir de nombreux tracks de remediation en parallel.
 
-#### Developer mental model
+#### Mental model d'un Développeur
 
-You need to speed up a slow endpoint before a launch.
+On a besoin d'accélérer un endpoint lent avant un launch.
 
-- **Branches:** add Redis caching, rewrite query with better indexes, or precompute data asynchronously.
-- **Score:** Evaluate by implementation effort, risk, expected gain, and testability.
-- **Prune:** Select one strategy to implement now.
-- **Act:** Ship the chosen change and measure.
+- **Branches :** Ajouter le caching Redis, réécrire la requête avec de meilleurs indexes, ou pré-computer les données de manière asynchrone.
+- **Score :** Évaluer par effort d'implémentation, risque, gain attendu et testabilité.
+- **Prune :** Sélectionner une stratégie à implémenter maintenant.
+- **Act :** Ship le changement choisi et mesurer.
 
-Why ToT fits: when deadlines are near, teams usually need one implementation winner, not a combined architecture experiment.
+Pourquoi le ToT fit : quand les deadlines approchent, les équipes ont généralement besoin d'un winner d'implémentation, pas d'un experiment d'architecture combiné.
 
-#### AI agent creator mental model
+#### Mental model d'un Créateur d'Agent IA
 
-You are building an autonomous coding agent that must choose a fix strategy.
+On construit un agent de codage autonome qui doit choisir une stratégie de fix.
 
-- **Branches:** minimal patch, deeper refactor, or rollback + guardrail.
-- **Score:** Rank by failure risk, blast radius, and confidence from repo evidence.
-- **Prune:** Keep one execution plan.
-- **Act:** Execute, verify, and report.
+- **Branches :** Patch minimal, refactor plus profond, ou rollback + guardrail.
+- **Score :** Ranger par risque d'échec, blast radius et confiance basée sur les preuves du repo.
+- **Prune :** Garder un plan d'exécution.
+- **Act :** Exécuter, vérifier et rapporter.
 
-Why ToT fits: you get predictable behavior, lower token/tool cost, and easier postmortems because the agent follows one explicit plan.
+Pourquoi le ToT fit : on obtient un comportement prévisible, un coût token/outil plus bas, et des postmortems plus faciles car l'agent suit un plan explicite.
 
-ToT is strongest when:
+Le ToT est le plus fort quand :
 
-- time is limited,
-- the output should be one actionable direction,
-- and the cost of keeping many alternatives alive is higher than the risk of losing nuance.
+- le temps est limité,
+- la sortie doit être une direction actionnable,
+- et le coût de maintenir de nombreuses alternatives vivantes est plus élevé que le risque de perdre de la nuance.
