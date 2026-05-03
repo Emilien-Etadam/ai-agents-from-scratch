@@ -1,9 +1,9 @@
-Download the models used in this repository
+Téléchargez les models utilisés dans ce dépôt
 
-You can adjust the quantization level to balance model precision and file size:
-Use `:Q8_0` for higher precision and better output quality, but note that it requires more memory and storage.
-Use `:Q6_K` for a good balance between size and accuracy (recommended default).
-Use `:Q5_K_S` for a smaller model that loads faster and uses less memory, but with slightly lower precision.
+Vous pouvez ajuster le niveau de quantization pour équilibrer précision du model et taille du fichier :
+Utilisez `:Q8_0` pour une précision plus élevée et une meilleure qualité de sortie, mais notez qu'il nécessite plus de mémoire et de stockage.
+Utilisez `:Q6_K` pour un bon compromis entre taille et précision (recommandé par défaut).
+Utilisez `:Q5_K_S` pour un model plus petit qui se charge plus rapidement et utilise moins de mémoire, mais avec une précision légèrement inférieure.
 
 ```
 npx --no node-llama-cpp pull --dir ./models hf:Qwen/Qwen3-1.7B-GGUF:Q8_0 --filename Qwen3-1.7B-Q8_0.gguf
