@@ -1,28 +1,28 @@
-# Code Explanation: batch.js
+# Explication du Code : batch.js
 
-This file demonstrates **parallel execution** of multiple LLM prompts using separate context sequences, enabling concurrent processing for better performance.
+Ce fichier démontre **l'exécution parallèle** de prompts LLM multiples à l'aide de séquences de context indépendantes, permettant un traitement concurrent pour de meilleures performances.
 
-## Step-by-Step Code Breakdown
+## Décomposition du Code étape par étape
 
-### 1. Import and Setup (Lines 1-10)
+### 1. Import et Configuration (lignes 1-10)
 ```javascript
 import {getLlama, LlamaChatSession} from "node-llama-cpp";
 import path from "path";
 import {fileURLToPath} from "url";
 
 /**
- * Asynchronous execution improves performance in GAIA benchmarks,
- * multi-agent applications, and other high-throughput scenarios.
+ * L'exécution asynchrone améliore les performances dans les benchmarks GAIA,
+ * les applications multi-agents et autres scénarios à haut débit.
  */
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 ```
-- Standard imports for LLM interaction
-- Comment explains the performance benefit
-- **GAIA benchmark**: A standard for testing AI agent performance
-- Useful for multi-agent systems that need to handle many requests
+- Imports standard pour l'interaction avec le LLM
+- Le commentaire explique le bénéfice en performance
+- **Benchmark GAIA** : Un standard pour tester les performances des agents IA
+- Utile pour les systèmes multi-agents qui doivent gérer de nombreuses requêtes
 
-### 2. Model Path Configuration (Lines 11-16)
+### 2. Configuration du Chemin du Model (lignes 11-16)
 ```javascript
 const modelPath = path.join(
     __dirname,
@@ -31,61 +31,61 @@ const modelPath = path.join(
     "DeepSeek-R1-0528-Qwen3-8B-Q6_K.gguf"
 )
 ```
-- Uses **DeepSeek-R1**: An 8B parameter model optimized for reasoning
-- **Q6_K quantization**: Balance between quality and size
-- Model is loaded once and shared between sequences
+- Utilise **DeepSeek-R1** : Un model de 8B paramètres optimisé pour le raisonnement
+- **Quantization Q6_K** : Équilibre entre qualité et taille
+- Le model est chargé une fois et partagé entre les séquences
 
-### 3. Initialize Llama and Load Model (Lines 18-19)
+### 3. Initialiser Llama et Charger le Model (lignes 18-19)
 ```javascript
 const llama = await getLlama();
 const model = await llama.loadModel({modelPath});
 ```
-- Standard initialization
-- Model is loaded into memory once
-- Will be used by multiple sequences simultaneously
+- Initialisation standard
+- Le model est chargé en mémoire une seule fois
+- Sera utilisé par plusieurs séquences simultanément
 
-### 4. Create Context with Multiple Sequences (Lines 20-23)
+### 4. Créer le Context avec Plusieurs Séquences (lignes 20-23)
 ```javascript
 const context = await model.createContext({
     sequences: 2,
-    batchSize: 1024 // The number of tokens that can be processed at once by the GPU.
+    batchSize: 1024 // Le nombre de tokens pouvant être traités en une fois par le GPU.
 });
 ```
 
-**Key parameters:**
+**Paramètres clés :**
 
-- **sequences: 2**: Creates 2 independent conversation sequences
-  - Each sequence has its own conversation history
-  - Both share the same model and context memory pool
-  - Can be processed in parallel
+- **sequences: 2** : Crée 2 séquences de conversation indépendantes
+  - Chaque séquence a son propre historique de conversation
+  - Les deux partagent le même model et pool de mémoire de context
+  - Peuvent être traitées en parallèle
 
-- **batchSize: 1024**: Maximum tokens processed per GPU batch
-  - Larger = better GPU utilization
-  - Smaller = lower memory usage
-  - 1024 is a good balance for most GPUs
+- **batchSize: 1024** : Nombre maximal de tokens traités par batch GPU
+  - Plus grand = meilleure utilisation du GPU
+  - Plus petit = usage mémoire réduit
+  - 1024 est un bon équilibre pour la plupart des GPU
 
-### Why Multiple Sequences?
+### Pourquoi Plusieurs Séquences ?
 
 ```
-Single Sequence (Sequential)     Multiple Sequences (Parallel)
+Séquence Unique (Séquentiel)     Séquences Multiples (Parallèle)
 ─────────────────────────       ──────────────────────────────
-Process Prompt 1 → Response 1    Process Prompt 1 ──┐
-Wait...                                              ├→ Both responses
-Process Prompt 2 → Response 2    Process Prompt 2 ──┘   in parallel!
+Traiter Prompt 1 → Réponse 1     Traiter Prompt 1 ──┐
+Attendre...                                                  ├→ Les deux réponses
+Traiter Prompt 2 → Réponse 2     Traiter Prompt 2 ──┘   en parallèle !
 
-Total Time: T1 + T2              Total Time: max(T1, T2)
+Temps total : T1 + T2              Temps total : max(T1, T2)
 ```
 
-### 5. Get Individual Sequences (Lines 25-26)
+### 5. Récupérer les Séquences Individuelles (lignes 25-26)
 ```javascript
 const sequence1 = context.getSequence();
 const sequence2 = context.getSequence();
 ```
-- Retrieves two separate sequence objects from the context
-- Each sequence maintains its own state
-- They can be used independently for different conversations
+- Récupère deux objets séquence séparés depuis le context
+- Chaque séquence maintient son propre état
+- Elles peuvent être utilisées indépendamment pour des conversations différentes
 
-### 6. Create Separate Sessions (Lines 28-33)
+### 6. Créer des Sessions Séparées (lignes 28-33)
 ```javascript
 const session1 = new LlamaChatSession({
     contextSequence: sequence1
@@ -94,21 +94,21 @@ const session2 = new LlamaChatSession({
     contextSequence: sequence2
 });
 ```
-- Creates a chat session for each sequence
-- Each session has its own conversation history
-- Sessions are completely independent
-- No system prompts in this example (could be added)
+- Crée une session de chat pour chaque séquence
+- Chaque session a son propre historique de conversation
+- Les sessions sont complètement indépendantes
+- Pas de system prompts dans cet exemple (pourrait être ajouté)
 
-### 7. Define Questions (Lines 35-36)
+### 7. Définir les Questions (lignes 35-36)
 ```javascript
 const q1 = "Hi there, how are you?";
 const q2 = "How much is 6+6?";
 ```
-- Two completely different questions
-- Will be processed simultaneously
-- Different types: conversational vs. computational
+- Deux questions complètement différentes
+- Seront traitées simultanément
+- Types différents : conversationnel vs. computationnel
 
-### 8. Parallel Execution with Promise.all (Lines 38-44)
+### 8. Exécution Parallèle avec Promise.all (lignes 38-44)
 ```javascript
 const [
     a1,
@@ -119,17 +119,17 @@ const [
 ]);
 ```
 
-**How this works:**
+**Comment ça fonctionne :**
 
-1. `session1.prompt(q1)` starts asynchronously
-2. `session2.prompt(q2)` starts asynchronously (doesn't wait for #1)
-3. `Promise.all()` waits for BOTH to complete
-4. Returns results in array: [response1, response2]
-5. Destructures into `a1` and `a2`
+1. `session1.prompt(q1)` démarre de manière asynchrone
+2. `session2.prompt(q2)` démarre de manière asynchrone (n'attend pas #1)
+3. `Promise.all()` attend que LES DEUX soient terminés
+4. Retourne les résultats dans un tableau : [réponse1, réponse2]
+5. Déstructure en `a1` et `a2`
 
-**Key benefit**: Both prompts are processed at the same time, not one after another!
+**Bénéfice clé** : Les deux prompts sont traités en même temps, pas l'un après l'autre !
 
-### 9. Display Results (Lines 46-50)
+### 9. Afficher les Résultats (lignes 46-50)
 ```javascript
 console.log("User: " + q1);
 console.log("AI: " + a1);
@@ -137,181 +137,181 @@ console.log("AI: " + a1);
 console.log("User: " + q2);
 console.log("AI: " + a2);
 ```
-- Outputs both question-answer pairs
-- Results appear in order despite parallel processing
+- Affiche les deux paires question-réponse
+- Les résultats apparaissent dans l'ordre malgré le traitement parallèle
 
-## Key Concepts Demonstrated
+## Concepts Clés Démontrés
 
-### 1. Parallel Processing
-Instead of:
+### 1. Traitement Parallèle
+Au lieu de :
 ```javascript
-// Sequential (slow)
-const a1 = await session1.prompt(q1);  // Wait
-const a2 = await session2.prompt(q2);  // Wait again
+// Séquentiel (lent)
+const a1 = await session1.prompt(q1);  // Attendre
+const a2 = await session2.prompt(q2);  // Attendre encore
 ```
 
-We use:
+On utilise :
 ```javascript
-// Parallel (fast)
+// Parallèle (rapide)
 const [a1, a2] = await Promise.all([
     session1.prompt(q1),
     session2.prompt(q2)
 ]);
 ```
 
-### 2. Context Sequences
-A context can hold multiple independent sequences:
+### 2. Séquences de Context
+Un context peut contenir plusieurs séquences indépendantes :
 
 ```
 ┌─────────────────────────────────────┐
-│          Context (Shared)           │
+│          Context (Partagé)          │
 │  ┌───────────────────────────────┐  │
-│  │  Model Weights (8B params)    │  │
+│  │  Poids du Model (8B params)   │  │
 │  └───────────────────────────────┘  │
 │                                     │
 │  ┌─────────────┐  ┌─────────────┐  │
-│  │ Sequence 1  │  │ Sequence 2  │  │
+│  │ Séquence 1  │  │ Séquence 2  │  │
 │  │ "Hi there"  │  │ "6+6?"      │  │
-│  │ History...  │  │ History...  │  │
+│  │ Historique..│  │ Historique..│  │
 │  └─────────────┘  └─────────────┘  │
 └─────────────────────────────────────┘
 ```
 
-## Performance Comparison
+## Comparaison de Performance
 
-### Sequential Execution
+### Exécution Séquentielle
 ```
-Request 1: 2 seconds
-Request 2: 2 seconds
-Total: 4 seconds
-```
-
-### Parallel Execution (This Example)
-```
-Request 1: 2 seconds ──┐
-Request 2: 2 seconds ──┤ Both running
-Total: ~2 seconds      └─ simultaneously
+Requête 1 : 2 secondes
+Requête 2 : 2 secondes
+Total : 4 secondes
 ```
 
-**Speedup**: ~2x for 2 sequences, scales with more sequences
+### Exécution Parallèle (Cet Exemple)
+```
+Requête 1 : 2 secondes ──┐
+Requête 2 : 2 secondes ──┤ Les deux tournent
+Total : ~2 secondes      └─ simultanément
+```
 
-## Use Cases
+**Gain de vitesse** : ~2x pour 2 séquences, évolue avec plus de séquences
 
-### 1. Multi-User Applications
+## Cas d'Usage
+
+### 1. Applications Multi-Utilisateurs
 ```javascript
-// Handle multiple users simultaneously
-const [user1Response, user2Response, user3Response] = await Promise.all([
-    session1.prompt(user1Query),
-    session2.prompt(user2Query),
-    session3.prompt(user3Query)
+// Gérer plusieurs utilisateurs simultanément
+const [réponseUtil1, réponseUtil2, réponseUtil3] = await Promise.all([
+    session1.prompt(requêteUtil1),
+    session2.prompt(requêteUtil2),
+    session3.prompt(requêteUtil3)
 ]);
 ```
 
-### 2. Multi-Agent Systems
+### 2. Systèmes Multi-Agents
 ```javascript
-// Multiple agents working on different tasks
+// Plusieurs agents travaillant sur différentes tâches
 const [
-    plannerResponse,
-    analyzerResponse,
-    executorResponse
+    réponsePlanificateur,
+    réponseAnalyste,
+    réponseExécuteur
 ] = await Promise.all([
-    plannerSession.prompt("Plan the task"),
-    analyzerSession.prompt("Analyze the data"),
-    executorSession.prompt("Execute step 1")
+    sessionPlanificateur.prompt("Planifier la tâche"),
+    sessionAnalyste.prompt("Analyser les données"),
+    sessionExécuteur.prompt("Exécuter étape 1")
 ]);
 ```
 
 ### 3. Benchmarking
 ```javascript
-// Test multiple prompts for evaluation
-const results = await Promise.all(
+// Tester plusieurs prompts pour évaluation
+const résultats = await Promise.all(
     testPrompts.map(prompt => session.prompt(prompt))
 );
 ```
 
-### 4. A/B Testing
+### 4. Tests A/B
 ```javascript
-// Test different system prompts
-const [responseA, responseB] = await Promise.all([
-    sessionWithPromptA.prompt(query),
-    sessionWithPromptB.prompt(query)
+// Tester différents system prompts
+const [réponseA, réponseB] = await Promise.all([
+    sessionAvecPromptA.prompt(requête),
+    sessionAvecPromptB.prompt(requête)
 ]);
 ```
 
-## Resource Considerations
+## Considérations de Ressources
 
-### Memory Usage
-Each sequence needs memory for:
-- Conversation history
-- Intermediate computations
-- KV cache (key-value cache for transformer attention)
+### Usage Mémoire
+Chaque séquence a besoin de mémoire pour :
+- L'historique de la conversation
+- Les calculs intermédiaires
+- Le cache KV (key-value cache pour l'attention transformer)
 
-**Rule of thumb**: More sequences = more memory needed
+**Règle générale** : Plus de séquences = plus de mémoire nécessaire
 
-### GPU Utilization
-- **Single sequence**: May underutilize GPU
-- **Multiple sequences**: Better GPU utilization
-- **Too many sequences**: May exceed VRAM, causing slowdown
+### Utilisation du GPU
+- **Séquence unique** : Peut sous-utiliser le GPU
+- **Séquences multiples** : Meilleure utilisation du GPU
+- **Trop de séquences** : Peut excéder la VRAM, causant un ralentissement
 
-### Optimal Number of Sequences
-Depends on:
-- Available VRAM
-- Model size
-- Context length
-- Batch size
+### Nombre Optimal de Séquences
+Dépend de :
+- VRAM disponible
+- Taille du model
+- Longueur du contexte
+- Taille de batch
 
-**Typical**: 2-8 sequences for consumer GPUs
+**Typique** : 2-8 séquences pour les GPU grand public
 
-## Limitations & Considerations
+## Limites et Considérations
 
-### 1. Shared Context Limit
-All sequences share the same context memory pool:
+### 1. Limite de Context Partagé
+Toutes les séquences partagent le même pool de mémoire de context :
 ```
-Total context size: 8192 tokens
-Sequence 1: 4096 tokens
-Sequence 2: 4096 tokens
-Maximum distribution!
+Taille totale du context : 8192 tokens
+Séquence 1 : 4096 tokens
+Séquence 2 : 4096 tokens
+Distribution maximale !
 ```
 
-### 2. Not True Parallelism for CPU
-On CPU-only systems, sequences are interleaved, not truly parallel. Still provides better overall throughput.
+### 2. Pas de Vrai Parallélisme pour le CPU
+Sur les systèmes CPU-only, les séquences sont entrelacées, pas vraiment parallèles. Offrent tout de même un meilleur débit global.
 
-### 3. Model Loading Overhead
-The model is loaded once and shared, which is efficient. But initial loading still takes time.
+### 3. Surcharge de Chargement du Model
+Le model est chargé une fois et partagé, ce qui est efficace. Mais le chargement initial prend tout de même du temps.
 
-## Why This Matters for AI Agents
+## Pourquoi Cela Compte pour les AI Agents
 
-### Efficiency in Production
-Real-world agent systems need to:
-- Handle multiple requests concurrently
-- Respond quickly to users
-- Make efficient use of hardware
+### Efficacité en Production
+Les systèmes agents en production doivent :
+- Gérer plusieurs requêtes simultanément
+- Répondre rapidement aux utilisateurs
+- Utiliser le matériel de manière efficace
 
-### Multi-Agent Architectures
-Complex agent systems often have:
-- **Planner agent**: Thinks about strategy
-- **Executor agent**: Takes actions
-- **Critic agent**: Evaluates results
+### Architectures Multi-Agents
+Les systèmes agents complexes ont souvent :
+- **Agent planificateur** : Pense à la stratégie
+- **Agent exécuteur** : Entreprend des actions
+- **Agent critique** : Évalue les résultats
 
-These can run in parallel using separate sequences.
+Ceux-ci peuvent tourner en parallèle en utilisant des séquences séparées.
 
-### Scalability
-This pattern is the foundation for:
-- Web services with multiple users
-- Batch processing of data
-- Distributed agent systems
+### Scalabilité
+Ce pattern est la fondation pour :
+- Services web avec plusieurs utilisateurs
+- Traitement par lots de données
+- Systèmes agents distribués
 
-## Best Practices
+## Bonnes Pratiques
 
-1. **Match sequences to workload**: Don't create more than you need
-2. **Monitor memory usage**: Each sequence consumes VRAM
-3. **Use appropriate batch size**: Balance speed vs. memory
-4. **Clean up resources**: Always dispose when done
-5. **Handle errors**: Wrap Promise.all in try-catch
+1. **Adapter les séquences à la charge** : Ne pas en créer plus que nécessaire
+2. **Surveiller l'usage mémoire** : Chaque séquence consomme de la VRAM
+3. **Utiliser une taille de batch appropriée** : Équilibrer vitesse vs. mémoire
+4. **Nettoyer les ressources** : Toujours disposer à la fin
+5. **Gérer les erreurs** : Envelopper Promise.all dans try-catch
 
-## Expected Output
+## Sortie Attendue
 
-Running this script should output something like:
+L'exécution de ce script devrait produire quelque chose comme :
 ```
 User: Hi there, how are you?
 AI: Hello! I'm doing well, thank you for asking...
@@ -320,4 +320,4 @@ User: How much is 6+6?
 AI: 12
 ```
 
-Both responses appear quickly because they were processed simultaneously!
+Les deux réponses apparaissent rapidement car elles ont été traitées simultanément !
