@@ -1,10 +1,10 @@
-# Code Explanation: coding.js
+# Explication du Code : coding.js
 
-This file demonstrates **streaming responses** with token limits and real-time output, showing how to get immediate feedback from the LLM as it generates text.
+Ce fichier démontre les **réponses en streaming** avec des limites de tokens et une sortie en temps réel, montrant comment obtenir un retour immédiat du LLM pendant la génération de texte.
 
-## Step-by-Step Code Breakdown
+## Décomposition du Code étape par étape
 
-### 1. Import and Setup (Lines 1-8)
+### 1. Import et Configuration (lignes 1-8)
 ```javascript
 import {
     getLlama,
@@ -16,39 +16,39 @@ import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 ```
-- Standard setup for LLM interaction
-- **HarmonyChatWrapper**: A chat format wrapper for models that use the Harmony format (more on this below)
+- Configuration standard pour l'interaction avec le LLM
+- **HarmonyChatWrapper** : Un wrapper de format de chat pour les models utilisant le format Harmony (voir plus bas)
 
-### 2. Understanding the Harmony Chat Format
+### 2. Comprendre le Format de Chat Harmony
 
-#### What is Harmony?
-Harmony is a structured message format used for multi-role chat interactions designed by OpenAI for their gpt-oss models. It's not just a prompt format - it's a complete rethinking of how models should structure their outputs, especially for complex reasoning and tool use.
+#### Qu'est-ce que Harmony ?
+Harmony est un format de message structuré utilisé pour les interactions de chat multi-rôles, conçu par OpenAI pour ses models gpt-oss. Ce n'est pas juste un format de prompt — c'est une repensée complète de la manière dont les models doivent structurer leurs sorties, surtout pour le raisonnement complexe et l'utilisation d'outils.
 
-#### Harmony Format Structure
+#### Structure du Format Harmony
 
-The format uses special tokens and syntax to define roles such as `system`, `developer`, `user`, `assistant`, and `tool`, as well as output "channels" (`analysis`, `commentary`, `final`) that let the model reason internally, call tools, and produce clean user-facing responses.
+Le format utilise des tokens et une syntaxe spéciaux pour définir des rôles tels que `system`, `developer`, `user`, `assistant` et `tool`, ainsi que des "canaux" de sortie (`analysis`, `commentary`, `final`) qui permettent au model de raisonner en interne, d'appeler des outils et de produire des réponses propres pour l'utilisateur.
 
-**Basic message structure:**
+**Structure de message de base :**
 ```
-<|start|>ROLE<|message|>CONTENT<|end|>
-<|start|>assistant<|channel|>CHANNEL<|message|>CONTENT<|end|>
+<|start|>ROLE<|message|>CONTENU<|end|>
+<|start|>assistant<|channel|>CANAL<|message|>CONTENU<|end|>
 ```
 
-**The five roles in hierarchy order** (system > developer > user > assistant > tool):
+**Les cinq rôles par ordre hiérarchique** (system > developer > user > assistant > tool) :
 
-1. **system**: Global identity, guardrails, and model configuration
-2. **developer**: Product policy and style instructions (what you typically think of as "system prompt")
-3. **user**: User messages and queries
-4. **assistant**: Model responses
-5. **tool**: Tool execution results
+1. **system** : Identité globale, garde-fous et configuration du model
+2. **developer** : Politique produit et instructions de style (ce qu'on appelle généralement "system prompt")
+3. **user** : Messages et requêtes utilisateur
+4. **assistant** : Réponses du model
+5. **tool** : Résultats d'exécution d'outils
 
-**The three output channels:**
+**Les trois canaux de sortie :**
 
-1. **analysis**: Private chain-of-thought reasoning not shown to users
-2. **commentary**: Tool calling preambles and process updates
-3. **final**: Clean user-facing responses
+1. **analysis** : Raisonnement chain-of-thought privé non montré aux utilisateurs
+2. **commentary** : Préambules de tool calling et mises à jour de processus
+3. **final** : Réponses propres visibles par l'utilisateur
 
-**Example of Harmony in action:**
+**Exemple de Harmony en action :**
 ```
 <|start|>system<|message|>You are a helpful assistant.<|end|>
 <|start|>developer<|message|>Always be concise.<|end|>
@@ -58,18 +58,17 @@ The format uses special tokens and syntax to define roles such as `system`, `dev
 <|start|>assistant<|channel|>final<|message|>The current time is 1:47 PM UTC.<|end|>
 ```
 
-#### Why Use Harmony?
+#### Pourquoi Utiliser Harmony ?
 
-Harmony separates how the model thinks, what actions it takes, and what finally goes to the user, resulting in cleaner tool use, safer defaults for UI, and better observability. For our translation example:
+Harmony sépare la façon dont le model pense, les actions qu'il entreprend et ce qui arrive finalement à l'utilisateur, ce qui résulte en un tool calling plus propre, des valeurs par défaut plus sûres pour l'UI et une meilleure observabilité. Pour notre exemple de traduction :
 
-- The `final` channel ensures we only get the translation, not explanations
-- The structured format helps the model follow instructions more reliably
-- The role hierarchy prevents instruction conflicts
+- Le canal `final` garantit qu'on obtient uniquement la traduction, pas d'explications
+- Le format structuré aide le model à suivre les instructions de manière plus fiable
+- La hiérarchie de rôles évite les conflits d'instructions
 
-**Important Note**: Models need to be specifically trained or fine-tuned to produce Harmony output correctly. You can't just apply this format to any model. Apertus and other models not explicitly trained on Harmony may be confused by this structure, but the HarmonyChatWrapper in node-llama-cpp handles the necessary formatting automatically.
+**Note Importante** : Les models doivent être spécifiquement entraînés ou fine-tuned pour produire une sortie Harmony correcte. On ne peut pas simplement appliquer ce format à n'importe quel model. Apertus et d'autres models pas explicitement entraînés sur Harmony peuvent être confus par cette structure, mais le HarmonyChatWrapper dans node-llama-cpp gère le formatage nécessaire automatiquement.
 
-
-### 3. Load Model (Lines 10-18)
+### 3. Charger le Model (lignes 10-18)
 ```javascript
 const llama = await getLlama();
 const model = await llama.loadModel({
@@ -81,11 +80,11 @@ const model = await llama.loadModel({
     )
 });
 ```
-- Uses **gpt-oss-20b**: A 20 billion parameter model
-- **MXFP4**: Mixed precision 4-bit quantization for smaller size
-- Larger model = better code explanations
+- Utilise **gpt-oss-20b** : Un model de 20 milliards de paramètres
+- **MXFP4** : Quantization mixed precision 4-bit pour une taille réduite
+- Model plus grand = meilleures explications de code
 
-### 4. Create Context and Session (Lines 19-22)
+### 4. Créer le Context et la Session (lignes 19-22)
 ```javascript
 const context = await model.createContext();
 const session = new LlamaChatSession({
@@ -93,23 +92,23 @@ const session = new LlamaChatSession({
     contextSequence: context.getSequence(),
 });
 ```
-Basic session setup with no system prompt.
+Configuration de session de base sans system prompt.
 
-### 5. Define the Question (Line 24)
+### 5. Définir la Question (ligne 24)
 ```javascript
 const q1 = `What is hoisting in JavaScript? Explain with examples.`;
 ```
-A technical programming question that requires detailed explanation.
+Une question technique de programmation qui nécessite une explication détaillée.
 
-### 6. Display Context Size (Line 26)
+### 6. Afficher la Taille du Context (ligne 26)
 ```javascript
 console.log('context.contextSize', context.contextSize)
 ```
-- Shows the maximum context window size
-- Helps understand memory limitations
-- Useful for debugging
+- Affiche la taille maximale de la fenêtre de context
+- Aide à comprendre les limites mémoire
+- Utile pour le debugging
 
-### 7. Streaming Prompt Execution (Lines 28-36)
+### 7. Exécution du Prompt en Streaming (lignes 28-36)
 ```javascript
 const a1 = await session.prompt(q1, {
     // Tip: let the lib choose or cap reasonably; using the whole context size can be wasteful
@@ -117,264 +116,264 @@ const a1 = await session.prompt(q1, {
 
     // Fires as soon as the first characters arrive
     onTextChunk: (text) => {
-        process.stdout.write(text); // optional: live print
+        process.stdout.write(text); // optionnel : affichage live
     },
 });
 ```
 
-**Key parameters:**
+**Paramètres clés :**
 
 **maxTokens: 2000**
-- Limits response length to 2000 tokens (~1500 words)
-- Prevents runaway generation
-- Saves time and compute
-- Without limit: model uses entire context
+- Limite la longueur de la réponse à 2000 tokens (~1500 mots)
+- Empêche la génération sans fin
+- Économise du temps et du compute
+- Sans limite : le model utilise tout le context
 
-**onTextChunk callback**
-- Fires **as each token is generated**
-- Receives text as it's produced
-- `process.stdout.write()`: Prints without newlines
-- Creates real-time "typing" effect
+**Callback onTextChunk**
+- Se déclenche **à chaque token généré**
+- Reçoit le texte au fur et à mesure
+- `process.stdout.write()` : Affiche sans sauts de ligne
+- Crée un effet de "frappe" en temps réel
 
-### How Streaming Works
+### Comment le Streaming Fonctionne
 
 ```
-Without streaming:
-User → [Wait 10 seconds...] → Complete response appears
+Sans streaming :
+Utilisateur → [Attendre 10 secondes...] → Réponse complète apparaît
 
-With streaming:
-User → [Token 1] → [Token 2] → [Token 3] → ... → Complete
-       "What"      "is"        "hoisting"
-       (Immediate feedback!)
+Avec streaming :
+Utilisateur → [Token 1] → [Token 2] → [Token 3] → ... → Complet
+             "What"      "is"        "hoisting"
+             (Feedback immédiat !)
 ```
 
-### 8. Display Final Answer (Line 38)
+### 8. Afficher la Réponse Finale (ligne 38)
 ```javascript
 console.log("\n\nFinal answer:\n", a1);
 ```
-- Prints the complete response again
-- Useful for logging or verification
-- Shows full text after streaming
+- Affiche la réponse complète une nouvelle fois
+- Utile pour le logging ou la vérification
+- Montre le texte intégral après le streaming
 
-### 9. Cleanup (Lines 41-44)
+### 9. Nettoyage (lignes 41-44)
 ```javascript
 session.dispose()
 context.dispose()
 model.dispose()
 llama.dispose()
 ```
-Standard resource cleanup.
+Nettoyage standard des ressources.
 
-## Key Concepts Demonstrated
+## Concepts Clés Démontrés
 
-### 1. Streaming Responses
+### 1. Réponses en Streaming
 
-**Why streaming matters:**
-- **Better UX**: Users see progress immediately
-- **Early termination**: Can stop if response is off-track
-- **Perceived speed**: Feels faster than waiting
-- **Debugging**: See generation in real-time
+**Pourquoi le streaming compte :**
+- **Meilleure UX** : Les utilisateurs voient la progression immédiatement
+- **Arrêt anticipé** : Peut arrêter si la réponse dérive
+- **Perception de vitesse** : Paraît plus rapide que d'attendre
+- **Debugging** : Voir la génération en temps réel
 
-**Comparison:**
+**Comparaison :**
 ```
-Non-streaming:           Streaming:
+Non-streaming :           Streaming :
 ═══════════════         ═══════════════
-Request sent            Request sent
-[10s wait...]           "What" (0.1s)
-Complete response       "is" (0.2s)
-                        "hoisting" (0.3s)
-                        ... continues
-                        (Same total time, better experience!)
+Requête envoyée          Requête envoyée
+[10s d'attente...]       "What" (0,1s)
+Réponse complète         "is" (0,2s)
+                         "hoisting" (0,3s)
+                         ... continue
+                         (Même temps total, meilleure expérience !)
 ```
 
-### 2. Token Limits
+### 2. Limites de Tokens
 
-**maxTokens controls generation length:**
+**maxTokens contrôle la longueur de génération :**
 
 ```
-No limit:               With limit (2000):
-─────────             ─────────────────
-May generate forever   Stops at 2000 tokens
-Uses entire context    Saves computation
-Unpredictable cost     Predictable cost
+Sans limite :             Avec limite (2000) :
+─────────                ─────────────────
+Peut générer indéfiniment Arrête à 2000 tokens
+Utilise tout le context  Économise du compute
+Coût imprévisible        Coût prévisible
 ```
 
-**Token approximation:**
-- 1 token ≈ 0.75 words (English)
-- 2000 tokens ≈ 1500 words
-- 4-5 paragraphs of detailed explanation
+**Approximation en tokens :**
+- 1 token ≈ 0,75 mot (anglais)
+- 2000 tokens ≈ 1500 mots
+- 4-5 paragraphes d'explication détaillée
 
-### 3. Real-Time Feedback Pattern
+### 3. Pattern de Feedback en Temps Réel
 
-The `onTextChunk` callback enables:
+Le callback `onTextChunk` permet :
 ```javascript
 onTextChunk: (text) => {
-    // Do anything with each chunk:
-    process.stdout.write(text);      // Console output
-    // socket.emit('chunk', text);   // WebSocket to client
-    // buffer += text;               // Accumulate for processing
-    // analyzePartial(text);         // Real-time analysis
+    // Faire quelque chose avec chaque chunk :
+    process.stdout.write(text);      // Sortie console
+    // socket.emit('chunk', text);   // WebSocket vers client
+    // buffer += text;               // Accumuler pour traitement
+    // analyzePartial(text);         // Analyse en temps réel
 }
 ```
 
-### 4. Context Size Awareness
+### 4. Awareness de la Taille de Context
 
 ```javascript
 console.log('context.contextSize', context.contextSize)
 ```
 
-Shows model's memory capacity:
-- Small models: 2048-4096 tokens
-- Medium models: 8192-16384 tokens  
-- Large models: 32768+ tokens
+Montre la capacité mémoire du model :
+- Petits models : 2048-4096 tokens
+- Models moyens : 8192-16384 tokens
+- Grands models : 32768+ tokens
 
-**Why it matters:**
+**Pourquoi ça compte :**
 ```
-Context Size: 4096 tokens
-Prompt: 100 tokens
-Max response: 2000 tokens
-History: Up to 1996 tokens
+Taille de Context : 4096 tokens
+Prompt : 100 tokens
+Réponse max : 2000 tokens
+Historique : Jusqu'à 1996 tokens
 ```
 
-## Use Cases
+## Cas d'Usage
 
-### 1. Code Explanations (This Example)
+### 1. Explications de Code (Cet Exemple)
 ```javascript
 prompt: "Explain hoisting in JavaScript"
-→ Streams detailed explanation with examples
+→ Streams une explication détaillée avec exemples
 ```
 
-### 2. Long-Form Content Generation
+### 2. Génération de Contenu Long
 ```javascript
 prompt: "Write a blog post about AI agents"
 maxTokens: 3000
-→ Streams article as it's written
+→ Streams l'article pendant qu'il est écrit
 ```
 
-### 3. Interactive Tutoring
+### 3. Tutorat Interactif
 ```javascript
-// User sees explanation being built
+// L'utilisateur voit l'explication se construire
 prompt: "Teach me about closures"
 onTextChunk: (text) => displayToUser(text)
 ```
 
-### 4. Web Applications
+### 4. Applications Web
 ```javascript
-// Server-Sent Events or WebSocket
+// Server-Sent Events ou WebSocket
 onTextChunk: (text) => {
-    websocket.send(text);  // Send to browser
+    websocket.send(text);  // Envoyer au navigateur
 }
 ```
 
-## Performance Considerations
+## Considérations de Performance
 
-### Token Generation Speed
+### Vitesse de Génération de Tokens
 
-Depends on:
-- **Model size**: Larger = slower per token
-- **Hardware**: GPU > CPU
-- **Quantization**: Lower bits = faster
-- **Context length**: Longer context = slower
+Dépend de :
+- **Taille du model** : Plus grand = plus lent par token
+- **Matériel** : GPU > CPU
+- **Quantization** : Moins de bits = plus rapide
+- **Longueur de context** : Context plus long = plus lent
 
-**Typical speeds:**
+**Vitesses typiques :**
 ```
-Model Size    GPU (RTX 4090)    CPU (M2 Max)
-──────────    ──────────────    ────────────
-1.7B          50-80 tok/s       15-25 tok/s
-8B            20-35 tok/s       5-10 tok/s
-20B           10-15 tok/s       2-4 tok/s
+Taille Model    GPU (RTX 4090)    CPU (M2 Max)
+──────────      ──────────────    ────────────
+1,7B            50-80 tok/s       15-25 tok/s
+8B              20-35 tok/s       5-10 tok/s
+20B             10-15 tok/s       2-4 tok/s
 ```
 
-### When to Use maxTokens
+### Quand Utiliser maxTokens
 
 ```
-✓ Use maxTokens when:
-  • Response length is predictable
-  • You want to save computation
+✓ Utiliser maxTokens quand :
+  • La longueur de réponse est prévisible
+  • Vous voulez économiser du compute
   • Testing/debugging
-  • API rate limiting
+  • Rate limiting d'API
 
-✗ Don't limit when:
-  • Need complete answer
-  • Length varies greatly
-  • Using stop sequences instead
+✗ Ne pas limiter quand :
+  • Besoin d'une réponse complète
+  • La longueur varie beaucoup
+  • Utilisation de stop sequences plutôt
 ```
 
-## Advanced Streaming Patterns
+## Patterns Avancés de Streaming
 
-### Pattern 1: Progressive Enhancement
+### Pattern 1 : Amélioration Progressive
 ```javascript
 let buffer = '';
 onTextChunk: (text) => {
     buffer += text;
     if (buffer.includes('\n\n')) {
-        // Complete paragraph ready
+        // paragraphe complet prêt
         processParagraph(buffer);
         buffer = '';
     }
 }
 ```
 
-### Pattern 2: Early Stopping
+### Pattern 2 : Arrêt Anticipé
 ```javascript
 let isRelevant = true;
 onTextChunk: (text) => {
     if (text.includes('irrelevant_keyword')) {
         isRelevant = false;
-        // Stop generation (would need additional API)
+        // Arrêter la génération (nécessiterait une API supplémentaire)
     }
 }
 ```
 
-### Pattern 3: Multi-Consumer
+### Pattern 3 : Multi-Consommateur
 ```javascript
 onTextChunk: (text) => {
     console.log(text);           // Console
-    logFile.write(text);         // File
+    logFile.write(text);         // Fichier
     websocket.send(text);        // Client
-    analyzer.process(text);      // Analysis
+    analyzer.process(text);      // Analyse
 }
 ```
 
-## Expected Output
+## Sortie Attendue
 
-When run, you'll see:
-1. Context size logged (e.g., "context.contextSize 32768")
-2. Streaming response appearing token-by-token
-3. Complete final answer printed again
+Lors de l'exécution, vous verrez :
+1. La taille du context logguée (ex. "context.contextSize 32768")
+2. La réponse en streaming apparaissant token par token
+3. La réponse finale complète affichée une nouvelle fois
 
-Example output flow:
+Exemple de flux de sortie :
 ```
 context.contextSize 32768
-Hoisting is a JavaScript mechanism where variables and function 
-declarations are moved to the top of their scope before code 
+Hoisting is a JavaScript mechanism where variables and function
+declarations are moved to the top of their scope before code
 execution. For example:
 
 console.log(x); // undefined (not an error!)
 var x = 5;
 
 This works because...
-[continues streaming...]
+[continue en streaming...]
 
 Final answer:
-[Complete response printed again]
+[Réponse complète affichée à nouveau]
 ```
 
-## Why This Matters for AI Agents
+## Pourquoi Cela Compte pour les AI Agents
 
-### User Experience
-- Real-time agents feel more responsive
-- Users can interrupt if going wrong direction
-- Better for conversational interfaces
+### Expérience Utilisateur
+- Les agents en temps réel paraissent plus réactifs
+- Les utilisateurs peuvent interrompre si la direction est mauvaise
+- Meilleur pour les interfaces conversationnelles
 
-### Resource Management
-- Token limits prevent runaway generation
-- Predictable costs and timing
-- Can cancel expensive operations early
+### Gestion des Ressources
+- Les limites de tokens empêchent la génération sans fin
+- Coûts et durées prévisibles
+- Possibilité d'annuler des opérations coûteuses tôt
 
-### Integration Patterns
-- Web UIs show "typing" effect
-- CLIs display progressive output
-- APIs stream to clients efficiently
+### Patterns d'Intégration
+- Les UIs web montrent un effet de "frappe"
+- Les CLIs affichent une sortie progressive
+- Les APIs stream vers les clients efficacement
 
-This pattern is essential for production agent systems where user experience and resource control matter.
+Ce pattern est essentiel pour les systèmes d'agents en production où l'expérience utilisateur et le contrôle des ressources comptent.
