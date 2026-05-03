@@ -1,25 +1,25 @@
-# Code Explanation: simple-agent-with-memory.js
+# Explication du Code : simple-agent-with-memory.js
 
-This example extends the simple agent with **persistent memory**, enabling it to remember information across sessions while intelligently avoiding duplicate saves.
+Cet exemple étend l'agent simple avec une **mémoire persistante**, lui permettant de retenir des informations à travers les sessions tout en évitant intelligemment les sauvegardes dupliquées.
 
-## Key Components
+## Composants Clés
 
-### 1. MemoryManager Import
+### 1. Import de MemoryManager
 ```javascript
 import {MemoryManager} from "./memory-manager.js";
 ```
-Custom class for persisting agent memories to JSON files with unified memory storage.
+Classe personnalisée pour persister les mémoires de l'agent dans des fichiers JSON avec un stockage de mémoire unifié.
 
-### 2. Initialize Memory Manager
+### 2. Initialiser le Memory Manager
 ```javascript
 const memoryManager = new MemoryManager('./agent-memory.json');
 const memorySummary = await memoryManager.getMemorySummary();
 ```
-- Loads existing memories from file
-- Generates formatted summary for system prompt
-- Handles migration from old memory schemas
+- Charge les mémoires existantes depuis le fichier
+- Génère un résumé formaté pour le system prompt
+- Gère la migration depuis les anciens schemas de mémoire
 
-### 3. Memory-Aware System Prompt with Reasoning
+### 3. System Prompt Sensible à la Mémoire avec Raisonnement
 ```javascript
 const systemPrompt = `
 You are a helpful assistant with long-term memory.
@@ -30,7 +30,7 @@ Before calling any function, always follow this reasoning process:
 2. **If the same key and value already exist**, do NOT call saveMemory again.
    - Instead, simply acknowledge the known information.
    - Example: if the user says "My name is Malua" and memory already says "user_name: Malua", reply "Yes, I remember your name is Malua."
-3. **If the user provides an updated value** (e.g., "I actually prefer sushi now"), 
+3. **If the user provides an updated value** (e.g., "I actually prefer sushi now"),
    then call saveMemory once to update the value.
 4. **Only call saveMemory for genuinely new information.**
 
@@ -47,13 +47,13 @@ ${memorySummary}
 `;
 ```
 
-**What this does:**
-- Includes existing memories in the prompt
-- Provides explicit reasoning guidelines to prevent duplicate saves
-- Teaches the agent to compare before saving
-- Instructs when to update vs. acknowledge existing data
+**Ce que ça fait :**
+- Inclut les mémoires existantes dans le prompt
+- Fournit des directives de raisonnement explicites pour prévenir les sauvegardes dupliquées
+- Enseigne à l'agent de comparer avant de sauvegarder
+- Indique quand mettre à jour vs. reconnaître les données existantes
 
-### 4. saveMemory Function
+### 4. Fonction saveMemory
 ```javascript
 const saveMemory = defineChatSessionFunction({
     description: "Save important information to long-term memory (user preferences, facts, personal details)",
@@ -76,104 +76,104 @@ const saveMemory = defineChatSessionFunction({
 });
 ```
 
-**What it does:**
-- Uses structured key-value format for all memories
-- Saves both facts and preferences with the same method
-- Automatically handles duplicates (updates if value changes)
-- Persists to JSON file
-- Returns confirmation message
+**Ce qu'elle fait :**
+- Utilise un format structuré clé-valeur pour toutes les mémoires
+- Sauvegarde à la fois les faits et les préférences avec la même méthode
+- Gère automatiquement les doublons (met à jour si la valeur change)
+- Persiste dans un fichier JSON
+- Retourne un message de confirmation
 
-**Parameter Structure:**
-- `type`: Either "fact" or "preference"
-- `key`: Short identifier (e.g., "user_name", "favorite_food")
-- `value`: The actual information (e.g., "Alex", "pizza")
+**Structure des Paramètres :**
+- `type` : Soit "fact" soit "preference"
+- `key` : Identifiant court (ex. "user_name", "favorite_food")
+- `value` : L'information réelle (ex. "Alex", "pizza")
 
-### 5. Example Conversation
+### 5. Exemple de Conversation
 ```javascript
 const prompt1 = "Hi! My name is Alex and I love pizza.";
 const response1 = await session.prompt(prompt1, {functions});
-// Agent calls saveMemory twice:
+// L'agent appelle saveMemory deux fois :
 // - saveMemory({ type: "fact", key: "user_name", value: "Alex" })
 // - saveMemory({ type: "preference", key: "favorite_food", value: "pizza" })
 
 const prompt2 = "What's my favorite food?";
 const response2 = await session.prompt(prompt2, {functions});
-// Agent recalls from memory: "Pizza"
+// L'agent rappelle depuis la mémoire : "Pizza"
 ```
 
-## How Memory Works
+## Comment la Mémoire Fonctionne
 
-### Flow Diagram
+### Diagramme de Flux
 ```
-Session 1:
-User: "My name is Alex and I love pizza"
+Session 1 :
+Utilisateur : "My name is Alex and I love pizza"
   ↓
-Agent calls: saveMemory({ type: "fact", key: "user_name", value: "Alex" })
-Agent calls: saveMemory({ type: "preference", key: "favorite_food", value: "pizza" })
+Agent appelle : saveMemory({ type: "fact", key: "user_name", value: "Alex" })
+Agent appelle : saveMemory({ type: "preference", key: "favorite_food", value: "pizza" })
   ↓
-Saved to: agent-memory.json
+Sauvegardé dans : agent-memory.json
 
-Session 2 (after restart):
-1. Load memories from agent-memory.json
-2. Add to system prompt
-3. Agent sees: "user_name: Alex" and "favorite_food: pizza"
-4. Can use this information in responses
+Session 2 (après redémarrage) :
+1. Charger les mémoires depuis agent-memory.json
+2. Ajouter au system prompt
+3. L'agent voit : "user_name: Alex" et "favorite_food: pizza"
+4. Peut utiliser cette information dans les réponses
 
-Session 3:
-User: "My name is Alex"
+Session 3 :
+Utilisateur : "My name is Alex"
   ↓
-Agent compares: user_name already = "Alex"
+Agent compare : user_name déjà = "Alex"
   ↓
-No function call! Just acknowledges: "Yes, I remember your name is Alex."
+Pas d'appel de fonction ! Reconnaît simplement : "Yes, I remember your name is Alex."
 ```
 
-## The MemoryManager Class
+## La Classe MemoryManager
 
-Located in `memory-manager.js`:
+Située dans `memory-manager.js` :
 ```javascript
 class MemoryManager {
-  async loadMemories()           // Load from JSON (handles schema migration)
-  async saveMemories()           // Write to JSON
-  async addMemory()              // Unified method for all memory types
-  async getMemorySummary()       // Format memories for system prompt
-  extractKey()                   // Helper for migration
-  extractValue()                 // Helper for migration
+  async loadMemories()           // Charger depuis JSON (gère la migration de schema)
+  async saveMemories()           // Écrire dans JSON
+  async addMemory()              // Méthode unifiée pour tous les types de mémoire
+  async getMemorySummary()       // Formater les mémoires pour le system prompt
+  extractKey()                   // Helper pour migration
+  extractValue()                 // Helper pour migration
 }
 ```
 
-**Benefits:**
-- Single unified method for all memory types
-- Automatic duplicate detection and prevention
-- Automatic value updates when information changes
+**Bénéfices :**
+- Méthode unifiée unique pour tous les types de mémoire
+- Détection et prévention automatique des doublons
+- Mises à jour automatiques des valeurs quand l'information change
 
-## Key Concepts
+## Concepts Clés
 
-### 1. Structured Memory Format
-All memories now use a consistent structure:
+### 1. Format Structuré de Mémoire
+Toutes les mémoires utilisent maintenant une structure cohérente :
 ```javascript
 {
   type: "fact" | "preference",
-  key: "user_name",           // Identifier
-  value: "Alex",              // The actual data
-  source: "user",             // Where it came from
-  timestamp: "2025-10-29..."  // When it was saved/updated
+  key: "user_name",           // Identifiant
+  value: "Alex",              // Les données réelles
+  source: "user",             // D'où ça vient
+  timestamp: "2025-10-29..."  // Quand ça a été sauvegardé/mis à jour
 }
 ```
 
-### 2. Intelligent Duplicate Prevention
-The agent is trained to:
-- **Compare** before saving
-- **Skip** if data is identical
-- **Update** if value changed
-- **Acknowledge** existing memories instead of re-saving
+### 2. Prévention Intelligente des Doublons
+L'agent est entraîné à :
+- **Comparer** avant de sauvegarder
+- **Sauter** si les données sont identiques
+- **Mettre à jour** si la valeur a changé
+- **Reconnaître** les mémoires existantes au lieu de les resauvegarder
 
-### 3. Persistent State
-- Memories survive script restarts
-- Stored in JSON file with metadata
-- Loaded at startup and injected into prompt
+### 3. État Persistant
+- Les mémoires survivent aux redémarrages du script
+- Stockées dans un fichier JSON avec métadonnées
+- Chargées au démarrage et injectées dans le prompt
 
-### 4. Memory Integration in System Prompt
-Memories are automatically formatted and injected:
+### 4. Intégration de la Mémoire dans le System Prompt
+Les mémoires sont automatiquement formatées et injectées :
 ```
 === LONG-TERM MEMORY ===
 
@@ -186,62 +186,62 @@ User Preferences:
 - preferred_language: French
 ```
 
-## Why This Matters
+## Pourquoi Cela Compte
 
-**Without memory:** Agent starts fresh every time, asks same questions repeatedly
+**Sans mémoire** : L'agent recommence à zéro à chaque fois, pose les mêmes questions en permanence
 
-**With basic memory:** Agent remembers, but may save duplicates wastefully
+**Avec mémoire de base** : L'agent se souvient, mais peut sauvegarder des doublons gaspilleusement
 
-**With smart memory:** Agent remembers AND avoids redundant saves by reasoning first
+**Avec mémoire intelligente** : L'agent se souvient ET évite les sauvegardes redondantes en raisonnant d'abord
 
-This enables:
-- **Personalized responses** based on user history
-- **Efficient memory usage** (no duplicate entries)
-- **Natural conversations** that feel continuous
-- **Stateful agents** that maintain context
-- **Automatic updates** when information changes
+Cela permet :
+- **Des réponses personnalisées** basées sur l'historique utilisateur
+- **Un usage mémoire efficace** (pas d'entrées dupliquées)
+- **Des conversations naturelles** qui paraissent continues
+- **Des agents stateful** qui maintiennent le contexte
+- **Des mises à jour automatiques** quand l'information change
 
-## Expected Output
+## Sortie Attendue
 
-**First run:**
+**Première exécution :**
 ```
 User: "Hi! My name is Alex and I love pizza."
 AI: "Nice to meet you, Alex! I've noted that you love pizza."
-[Calls saveMemory twice - new information saved]
+[Appelle saveMemory deux fois - nouvelle information sauvegardée]
 ```
 
-**Second run (after restart):**
+**Deuxième exécution (après redémarrage) :**
 ```
 User: "What's my favorite food?"
 AI: "Your favorite food is pizza! You mentioned that you love it."
-[No function calls - recalls from loaded memory]
+[Pas d'appel de fonction - rappelle depuis la mémoire chargée]
 ```
 
-**Third run (duplicate statement):**
+**Troisième exécution (déclaration dupliquée) :**
 ```
 User: "My name is Alex."
 AI: "Yes, I remember your name is Alex!"
-[No function call - recognizes duplicate, just acknowledges]
+[Pas d'appel de fonction - reconnaît le doublon, reconnaît simplement]
 ```
 
-**Fourth run (updated information):**
+**Quatrième exécution (information mise à jour) :**
 ```
 User: "I actually prefer sushi now."
 AI: "Got it! I've updated your favorite food to sushi."
-[Calls saveMemory once - updates existing value]
+[Appelle saveMemory une fois - met à jour la valeur existante]
 ```
 
-## Reasoning Process
+## Processus de Raisonnement
 
-The system prompt explicitly guides the agent through this decision tree:
+Le system prompt guide explicitement l'agent à travers cet arbre de décision :
 ```
-New user statement
+Nouvelle déclaration utilisateur
     ↓
-Compare to existing memories
+Comparer aux mémoires existantes
     ↓
-    ├─→ Exact match? → Acknowledge only (no save)
-    ├─→ Updated value? → Save to update
-    └─→ New information? → Save as new
+    ├─→ Correspondance exacte ? → Reconnaître uniquement (pas de sauvegarde)
+    ├─→ Valeur mise à jour ? → Sauvegarder pour mettre à jour
+    └─→ Nouvelle information ? → Sauvegarder comme nouveau
 ```
 
-This reasoning-first approach makes the agent more intelligent and efficient with memory operations!
+Cette approche raisonnement-d'abord rend l'agent plus intelligent et efficace avec les opérations de mémoire !
