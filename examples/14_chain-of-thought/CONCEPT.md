@@ -1,167 +1,167 @@
-## Chain of Thought: Return decision (fraud vs legitimate)
+## Chain of Thought : Décision de retour (fraud vs légitime)
 
-**Idea:** A customer requests a return. Instead of letting the model jump directly to "approve/reject", it must write an explicit reasoning chain like a support agent documenting a case for a supervisor.
+**Idée :** Un client demande un retour. Au lieu de laisser le model sauter directement vers "approve/reject", il doit écrire une chaîne de raisonnement explicite comme un agent de support qui documente un cas pour un superviseur.
 
 ---
 
-### Visual chain
+### Chaîne visuelle
 
 ```text
-[Return request: "Defect claim on headphones"]
+[Requête de retour : "Claim de défaut sur des écouteurs"]
          |
-[Phase 1: Facts only]
+[Phase 1 : Facts uniquement]
          |
-[Phase 2: Red flags]
+[Phase 2 : Red flags]
          |
-[Phase 3: Legitimacy]
+[Phase 3 : Legitimacy]
          |
-[Phase 4: Policy check]
+[Phase 4 : Policy check]
          |
-[Phase 5: Final decision]
+[Phase 5 : Décision finale]
 ```
 
 ---
 
-### What Example 14 demonstrates
+### Ce que l'Exemple 14 démontre
 
-1. **Facts:** Extract data only, no early judgment.
-2. **Red Flags:** Run explicit fraud screening checkpoint-by-checkpoint.
-3. **Legitimacy:** Build the customer-side case as a balancing force.
-4. **Policy Check:** Apply rules (window, value, history) before deciding.
-5. **Decision:** Decide only after all prior phases are complete.
+1. **Facts :** Extraire les données uniquement, pas de jugement précoce.
+2. **Red Flags :** Exécuter un screening fraud explicite checkpoint par checkpoint.
+3. **Legitimacy :** Construire l'argument côté client comme force d'équilibrage.
+4. **Policy Check :** Appliquer les règles (window, valeur, history) avant de décider.
+5. **Decision :** Décider uniquement après que toutes les phases précédentes sont complètes.
 
-This structure makes the decision auditable and debuggable.
-
----
-
-### Why this matters in borderline cases
-
-Without Chain of Thought, a borderline case often becomes a guess.
-
-Example:
-- fraud score: **6/10**
-- legitimacy score: **7/10**
-
-A direct one-shot classifier may flip randomly based on prompt phrasing.
-With CoT, you can inspect each phase, identify the weak step, and fix the chain (for example policy interpretation or missing evidence handling).
+Cette structure rend la décision auditable et debuggable.
 
 ---
 
-### The five CoT phases and their role
+### Pourquoi Cela Compte dans les Cas Borderline
 
-| Phase | Why it exists |
+Sans Chain of Thought, un cas borderline devient souvent un guess.
+
+Exemple :
+- score fraud : **6/10**
+- score legitimacy : **7/10**
+
+Un classifieur one-shot direct peut flipper aléatoirement selon le phrasing du prompt.
+Avec CoT, on peut inspecter chaque phase, identifier le step faible, et corriger la chaîne (par exemple l'interprétation policy ou le traitement d'évidence manquante).
+
+---
+
+### Les cinq phases CoT et leur rôle
+
+| Phase | Pourquoi elle existe |
 |---|---|
-| Facts | Prevent early bias by separating extraction from evaluation |
-| Red Flags | Force explicit fraud risk checklist coverage |
-| Legitimacy | Preserve customer fairness and avoid one-sided suspicion |
-| Policy Check | Constrain model behavior with business rules |
-| Decision | Produce a traceable outcome with clear rationale |
+| Facts | Prévenir le biais précoce en séparant l'extraction de l'évaluation |
+| Red Flags | Forcer la couverture explicite de la checklist de risque fraud |
+| Legitimacy | Préserver l'équité client et éviter la suspicion unilatérale |
+| Policy Check | Contraindre le comportement du model avec des règles business |
+| Decision | Produire un outcome traçable avec un rationale clair |
 
 ---
 
-### Core takeaway
+### Takeaway Fondamental
 
-Chain of Thought does not just improve answer quality.
-It improves **governance**:
+Le Chain of Thought n'améliore pas juste la qualité de réponse.
+Il améliore la **gouvernance** :
 
-- supervisors can audit why a case was approved/rejected,
-- teams can spot where reasoning drift happened,
-- and policy changes can be reflected by updating one phase instead of rewriting the whole prompt.
-
----
-
-### CoT with reasoning vs non-reasoning LLMs
-
-A common confusion: "If reasoning models like o3, DeepSeek-R1, or Qwen3 with thought mode enabled already reason internally, do I still need explicit Chain of Thought?"
-
-The answer is yes, but the role of CoT changes.
-
-#### The mental model
-
-- **Non-reasoning LLM** (base GPT-4o, Llama-3 chat, Qwen3 with `thoughts: "discourage"`, Phi):
-  - prompt -> answer.
-  - There is no intermediate reasoning unless you build it.
-  - CoT scaffolding **creates** the reasoning that would otherwise not exist.
-- **Reasoning LLM** (o3, DeepSeek-R1, Claude Extended Thinking, Qwen3 with `thoughts: "auto"`):
-  - prompt -> hidden chain -> answer.
-  - The model already produces internal reasoning tokens.
-  - CoT scaffolding **channels** that reasoning into a fixed, inspectable shape.
-
-#### Why explicit CoT is critical on a non-reasoning model
-
-- Without scaffolding, borderline cases (fraud 6/10 vs legitimacy 7/10) collapse into coin-flip behavior.
-- The model has no "place" to reason in, so it picks an answer-shape and back-fills justification.
-- Each of the 5 phases forces coverage that the model would otherwise skip - especially the legitimacy phase, which counters one-sided suspicion.
-- Schema grammar matters more here, because the model has fewer defenses against drifting outside the contract.
-
-#### Why explicit CoT is still valuable on a reasoning model
-
-- Hidden internal reasoning is **not auditable**. Compliance, support QA, and incident reviews need a written trail, not an opaque "we trust the model".
-- Internal reasoning does not follow **your** taxonomy. Your fraud checklist, your policy rules, your refund workflow - all of these are domain-specific and absent from any pretraining corpus.
-- You cannot fix a step you cannot see. If a borderline case keeps going wrong, structured phases let you locate the weak link (for example: legitimacy reasoning is too soft) and improve only that prompt.
-- Internal reasoning varies between runs. Structured CoT produces a stable contract for downstream tooling (logging, analytics, escalation routing).
-- Public reasoning traces from reasoning models can be **post-hoc rationalizations** rather than the actual decision path. Treat them as a UX feature, not as audit evidence.
-
-#### Practical recommendations
-
-- Reasoning model + light CoT: keep the 5 phases, shorten phase prompts, let the model reason inside each call. Lower verbosity, same auditability.
-- Non-reasoning model + heavy CoT: keep the 5 phases, expand phase prompts with checklists and examples, tighten schemas, lower temperature.
-- Hybrid model like Qwen3: pick a thought mode per phase. Use `thoughts: "auto"` on Phase 5 (Decision) where trade-offs matter, and `thoughts: "discourage"` on Phase 1 (Facts) where extraction is mechanical.
-
-#### Anti-patterns
-
-- Telling a reasoning model to "think step by step" inside the prompt - redundant token spend, and it can derail the model's own internal chain.
-- Using a non-reasoning model for borderline decisions without CoT - results are not reproducible, not defensible, and not safe in production.
-- Trusting raw reasoning traces from reasoning models as audit evidence - they look convincing but are not policy-compliant by construction.
-- Comparing `confidence` values across model classes - calibration differs sharply; treat confidence as model-internal only.
-
-#### Bottom line
-
-CoT is not a substitute for a reasoning model, and a reasoning model is not a substitute for CoT. They solve different problems:
-
-- **Reasoning models** improve raw answer quality.
-- **Chain of Thought** turns whatever reasoning happens into a governable workflow.
-
-For high-impact decisions, you usually want both.
+- les superviseurs peuvent auditer pourquoi un cas a été approved/rejected,
+- les équipes peuvent repérer où le drift de raisonnement a eu lieu,
+- et les changements de policy peuvent être reflétés en update une seule phase au lieu de réécrire tout le prompt.
 
 ---
 
-### When to use CoT in real work
+### CoT avec les LLMs de Reasoning vs Non-Reasoning
 
-Use Chain of Thought when decisions are high-impact and need reviewability.
+Une confusion courante : "Si les models de reasoning comme o3, DeepSeek-R1 ou Qwen3 avec thought mode activé raisonnent déjà internally, ai-je encore besoin d'un Chain of Thought explicite ?"
 
-#### System admin mental model
+La réponse est oui, mais le rôle du CoT change.
 
-A deployment request looks risky, but not obviously wrong.
+#### Le mental model
 
-- **Facts:** current load, recent incidents, rollback readiness.
-- **Risk flags:** missing runbook steps, privilege escalation, timing risks.
-- **Legitimacy:** business urgency, maintenance window, mitigation controls.
-- **Policy:** change management rules and approval gates.
-- **Decision:** approve, reject, or escalate to manual review.
+- **LLM non-reasoning** (base GPT-4o, Llama-3 chat, Qwen3 avec `thoughts: "discourage"`, Phi) :
+  - prompt -> réponse.
+  - Il n'y a pas de raisonnement intermédiaire à moins de le construire.
+  - Le scaffolding CoT **crée** le raisonnement qui n'existerait autrement pas.
+- **LLM de reasoning** (o3, DeepSeek-R1, Claude Extended Thinking, Qwen3 avec `thoughts: "auto"`) :
+  - prompt -> chaîne cachée -> réponse.
+  - Le model produit déjà des tokens de raisonnement interne.
+  - Le scaffolding CoT **canalise** ce raisonnement dans une forme fixe et inspectable.
 
-Why CoT fits: operations decisions need an audit trail, not gut feeling.
+#### Pourquoi le CoT explicite est critique sur un model non-reasoning
 
-#### Developer mental model
+- Sans scaffolding, les cas borderline (fraud 6/10 vs legitimacy 7/10) s'effondrent en comportement de coin-flip.
+- Le model n'a pas de "place" pour raisonner, donc il choisit une forme de réponse et back-fills la justification.
+- Chacune des 5 phases force une couverture que le model sauterait autrement — surtout la phase legitimacy, qui contre la suspicion unilatérale.
+- La schema grammar compte plus ici, car le model a moins de défenses contre le drift hors du contrat.
 
-A pull request is controversial and may introduce regressions.
+#### Pourquoi le CoT explicite reste valorisable sur un model de reasoning
 
-- **Facts:** changed modules, test results, performance deltas.
-- **Risk flags:** no migration plan, fragile dependencies, weak coverage.
-- **Legitimacy:** user impact, bug severity, release urgency.
-- **Policy:** review requirements, branch protection, release criteria.
-- **Decision:** merge, block, or request additional checks.
+- Le raisonnement interne caché n'est **pas auditable**. La compliance, le QA support et les reviews d'incident ont besoin d'une trace écrite, pas d'un opaque "on trust le model".
+- Le raisonnement interne ne suit pas **votre** taxonomie. Votre checklist fraud, vos règles policy, votre workflow refund — tout ça est domain-specific et absent de n'importe quel corpus de pretraining.
+- On ne peut pas fixer un step qu'on ne voit pas. Si un cas borderline continue de mal aller, les phases structurées permettent de localiser le maillon faible (par exemple : le raisonnement legitimacy est trop soft) et d'améliorer uniquement ce prompt.
+- Le raisonnement interne varie entre runs. Le CoT structuré produit un contrat stable pour le tooling downstream (logging, analytics, escalation routing).
+- Les traces de raisonnement publiques des models de reasoning peuvent être des **rationalisations post-hoc** plutôt que le vrai chemin de décision. Les traiter comme une feature UX, pas comme une preuve d'audit.
 
-Why CoT fits: code review quality improves when rationale is structured and inspectable.
+#### Recommandations Pratiques
 
-#### AI agent creator mental model
+- Model reasoning + CoT light : garder les 5 phases, raccourcir les phase prompts, laisser le model raisonner à l'intérieur de chaque call. Moins de verbosité, même auditabilité.
+- Model non-reasoning + CoT heavy : garder les 5 phases, expand les phase prompts avec des checklists et exemples, resserrer les schemas, baisser la temperature.
+- Model hybrid comme Qwen3 : choisir un mode thought par phase. Utiliser `thoughts: "auto"` sur Phase 5 (Decision) où les trade-offs comptent, et `thoughts: "discourage"` sur Phase 1 (Facts) où l'extraction est mécanique.
 
-An autonomous support agent must decide refunds safely.
+#### Anti-Patterns
 
-- **Facts:** order timeline, account history, evidence provided.
-- **Risk flags:** abuse patterns and identity inconsistency.
-- **Legitimacy:** plausible defect indicators and customer context.
-- **Policy:** hard constraints from business rules.
-- **Decision:** deterministic workflow output with confidence and notes.
+- Dire à un model de reasoning de "think step by step" dans le prompt — dépense de tokens redondante, et ça peut dérailer la chaîne interne du model.
+- Utiliser un model non-reasoning pour des décisions borderline sans CoT — les résultats ne sont ni reproductibles, ni défendables, ni sûrs en production.
+- Trust les traces de raisonnement raw des models de reasoning comme preuve d'audit — elles ont l'air convaincantes mais ne sont pas policy-compliant par construction.
+- Comparer les valeurs de `confidence` entre classes de models — la calibration diffère fortement ; traiter la confidence comme model-internal uniquement.
 
-Why CoT fits: it gives transparent reasoning traces that are easier to monitor and correct.
+#### Bottom Line
+
+Le CoT n'est pas un substitute pour un model de reasoning, et un model de reasoning n'est pas un substitute pour le CoT. Ils résolvent des problèmes différents :
+
+- **Les models de reasoning** améliorent la qualité brute de réponse.
+- **Le Chain of Thought** transforme tout raisonnement en un workflow gouvernable.
+
+Pour les décisions à fort impact, on veut généralement les deux.
+
+---
+
+### Quand utiliser le CoT dans le travail réel
+
+Utiliser le Chain of Thought quand les décisions sont à fort impact et nécessitent de la reviewability.
+
+#### Mental model d'un System Admin
+
+Une requête de déploiement semble risquée, mais pas obviously wrong.
+
+- **Facts :** load actuelle, incidents récents, readiness de rollback.
+- **Risk flags :** steps de runbook manquants, escalation de privilège, risques de timing.
+- **Legitimacy :** urgence business, window de maintenance, controls de mitigation.
+- **Policy :** règles de change management et portes d'approbation.
+- **Decision :** approve, reject ou escalader vers review manuel.
+
+Pourquoi le CoT fit : les décisions opérationnelles ont besoin d'un audit trail, pas de gut feeling.
+
+#### Mental model d'un Développeur
+
+Un pull request est controversé et peut introduire des régressions.
+
+- **Facts :** modules changés, résultats de tests, deltas de performance.
+- **Risk flags :** pas de plan de migration, dépendances fragiles, couverture faible.
+- **Legitimacy :** impact utilisateur, sévérité du bug, urgence de release.
+- **Policy :** exigences de review, branch protection, critères de release.
+- **Decision :** merge, block ou demander des checks additionnels.
+
+Pourquoi le CoT fit : la qualité de code review s'améliore quand le rationale est structuré et inspectable.
+
+#### Mental model d'un Créateur d'Agent IA
+
+Un agent de support autonome doit décider des refunds en sécurité.
+
+- **Facts :** timeline de commande, history de compte, evidence fournie.
+- **Risk flags :** patterns d'abus et incohérence d'identité.
+- **Legitimacy :** indicateurs de défaut plausibles et contexte client.
+- **Policy :** contraintes hard des règles business.
+- **Decision :** output de workflow deterministe avec confidence et notes.
+
+Pourquoi le CoT fit : il donne des traces de raisonnement transparentes qui sont plus faciles à monitorer et corriger.
