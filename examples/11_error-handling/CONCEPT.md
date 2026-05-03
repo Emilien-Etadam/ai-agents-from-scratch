@@ -1,80 +1,80 @@
-## Concept: Comprehensive error handling for agents
+## Concept : Gestion d'erreurs complète pour les agents
 
-Agents fail in more ways than regular apps because they orchestrate **multiple unreliable steps**:
+Les agents échouent de plus de façons que les apps régulières car ils orchestrent **plusieurs étapes non fiables** :
 
-- **LLM calls** (timeouts, resource constraints, malformed outputs, runtime exceptions)
-- **Tool execution** (network failures, invalid inputs, unavailable services)
-- **Workflow logic** (policy guards, partial completion, dependency chains across tools)
+- **Appels LLM** (timeouts, contraintes de ressources, sorties malformées, exceptions runtime)
+- **Exécution d'outils** (échecs réseau, inputs invalides, services indisponibles)
+- **Logique de workflow** (policy guards, complétion partielle, chaînes de dépendances entre outils)
 
-This example uses three ideas to make failures safe and understandable:
+Cet exemple utilise trois idées pour rendre les échecs sûrs et compréhensibles :
 
-### 1) Standardized error taxonomy
+### 1) Taxonomie d'erreurs standardisée
 
-Use a small set of error classes with **stable codes** and consistent fields:
+Utiliser un petit ensemble de classes d'erreurs avec des **codes stables** et des champs cohérents :
 
-- **`ValidationError`**: user input is missing/invalid (fail fast; usually not retryable)
-- **`LLMCallError`**: LLM provider/model call failed or returned unusable output (often retryable)
-- **`ToolExecutionError`**: a tool failed (sometimes retryable, sometimes not)
-- **`AgentWorkflowError`**: **orchestration-level** failure - the multi-step run cannot complete as designed.
+- **`ValidationError`** : l'input utilisateur est manquant/invalid (fail fast ; généralement pas retryable)
+- **`LLMCallError`** : l'appel LLM provider/model a échoué ou retourné une sortie inutilisable (souvent retryable)
+- **`ToolExecutionError`** : un outil a échoué (parfois retryable, parfois non)
+- **`AgentWorkflowError`** : échec au niveau **orchestration** — l'exécution multi-étapes ne peut pas se compléter comme conçu.
 
-In production you might split **`AgentWorkflowError`** into finer types (policy, workflow chain, full system outage). This lesson keeps **one class** with a **`step`** field and a short source comment so the **same shape** can stand in for those ideas in a small demo.
+En production, on pourrait splitter **`AgentWorkflowError`** en types plus fins (policy, chaîne workflow, panne système complète). Cette leçon garde **une seule classe** avec un champ **`step`** et un court commentaire source pour que la **même forme** puisse représenter ces idées dans une petite démo.
 
-Examples in this repo:
+Exemples dans ce repo :
 
-- **`policy_guard`** - after validation, a guard blocks the request (demo: user mentions **`u_demo_workflow`**).
-- **`resolve_user_profile`** - in degraded mode, **primary retries are exhausted**, **fallback is tried**, and **fallback also fails**; the surfaced error is workflow-level with the inner tool error as **`cause`**.
+- **`policy_guard`** — après validation, un guard bloque la requête (démo : l'utilisateur mentionne **`u_demo_workflow`**).
+- **`resolve_user_profile`** — en mode dégradé, **les retries primary sont épuisées**, **le fallback est essayé**, et **le fallback échoue aussi** ; l'erreur surfaçée est au niveau workflow avec l'erreur outil interne comme **`cause`**.
 
-Each error includes:
+Chaque erreur inclut :
 
-- **`code`**: machine-readable, stable identifier (good for metrics and alerting)
-- **`userMessage`**: safe, non-technical message shown to users
-- **`retryable`**: whether automated retry is appropriate
-- **`details`**: structured data for logs (tool name, step name, ids, etc.)
-- **`cause`**: original error (to preserve root cause chains)
+- **`code`** : identifiant stable, lisible par machine (bon pour les metrics et alerting)
+- **`userMessage`** : message sûr et non technique affiché aux utilisateurs
+- **`retryable`** : si le retry automatique est approprié
+- **`details`** : données structurées pour les logs (nom d'outil, nom de step, ids, etc.)
+- **`cause`** : erreur originale (pour préserver les chaînes de root cause)
 
-**`AgentWorkflowError`** additionally carries **`step`**. Its `details` merge `step` with any extra metadata you pass in.
+**`AgentWorkflowError`** transporte additionally **`step`**. Ses `details` fusionnent `step` avec toute métadonnée extra qu'on passe.
 
-### 2) Classification and recovery strategies
+### 2) Stratégies de Classification et de Récupération
 
-**Normalize, then classify.** **`normalizeUnknownError`** turns arbitrary thrown values into an **`AppError`**. **`classifyError`** adds **`retryable`** and **`type`** (`error.code`) so retries, logs, and user messaging share one pipeline instead of repeating `instanceof` trees.
+**Normaliser, puis classifier.** **`normalizeUnknownError`** transforme des valeurs thrown arbitraires en **`AppError`**. **`classifyError`** ajoute **`retryable`** et **`type`** (`error.code`) pour que les retries, logs et messages utilisateur partagent un seul pipeline au lieu de répéter des arbres `instanceof`.
 
-Recovery strategies (typical ladder), as shown with a real local LLM via `node-llama-cpp`:
+Stratégies de récupération (escalier typique), comme montré avec un vrai LLM local via `node-llama-cpp` :
 
-- **Timeout**: bound how long any step can stall
-- **Retry**: only when **`classifyError`** says **`retryable`** (with backoff and jitter)
-- **Fallback**: if the primary tool fails in a **transient** way, run a safer alternative that returns a degraded but useful answer
-- **Degraded mode**: if the LLM path fails, delegate to **`runDegradedProfileResolution`** - deterministic extraction of a **`u_<digits>`** id and the same **primary → fallback** tool model, without embedding that logic inline in a huge `catch`
-- **Graceful failure**: if recovery isn’t possible, return **`formatUserFacingError`** plus a correlation id
+- **Timeout** : borner combien de temps n'importe quelle étape peut staller
+- **Retry** : uniquement quand **`classifyError`** dit **`retryable`** (avec backoff et jitter)
+- **Fallback** : si l'outil primary échoue de manière **transitoire**, exécuter une alternative plus sûre qui retourne une réponse dégradée mais utile
+- **Mode dégradé** : si le chemin LLM échoue, déléguer à **`runDegradedProfileResolution`** — extraction deterministe d'un id **`u_<digits>`** et le même model d'outil **primary → fallback**, sans embarquer cette logique inline dans un énorme `catch`
+- **Échec gracieux** : si la récupération n'est pas possible, retourner **`formatUserFacingError`** plus un correlation id
 
-When **both** primary (after retries) and fallback fail in degraded mode, the example promotes that outcome to **`AgentWorkflowError`**: the user still sees one clear message, while **`cause`** retains the underlying tool failure for debugging.
+Quand **les deux** primary (après retries) et fallback échouent en mode dégradé, l'exemple promeut ce résultat en **`AgentWorkflowError`** : l'utilisateur voit quand même un message clair, tandis que **`cause`** conserve l'échec outil sous-jacent pour le debugging.
 
-### 3) Separate user messaging from debugging information
+### 3) Séparer les Messages Utilisateur de l'Information de Debugging
 
-Users should see:
+Les utilisateurs devraient voir :
 
-- clear next steps (try again, rephrase, shorten input)
-- no stack traces or provider internals
-- a **reference id** they can share with support
+- des prochaines étapes claires (réessayer, reformuler, raccourcir l'input)
+- pas de stack traces ou d'internals provider
+- un **reference id** qu'ils peuvent partager avec le support
 
-Developers/operators should see:
+Les développeurs/opérateurs devraient voir :
 
-- the stable error `code`
-- structured `details`
+- le `code` d'erreur stable
+- `details` structurés
 - correlation id
-- original **`cause`**
+- **`cause`** originale
 
-For **`AgentWorkflowError`**, the example also prints a **console banner** (step, code, correlation id, messages, details, cause summary) so live demos and local debugging stay readable next to a compact `[agent_error]` log line.
+Pour **`AgentWorkflowError`**, l'exemple affiche aussi un **banner console** (step, code, correlation id, messages, details, résumé cause) pour que les démos live et le debugging local restent lisibles à côté d'une ligne de log compacte `[agent_error]`.
 
-### Deterministic demos and `SIMULATION`
+### Démos Deterministes et `SIMULATION`
 
-To keep teaching runs predictable, user ids **`u_999`** and **`u_777`** are driven by a small **`SIMULATION`** map (see `error-handling.js`):
+Pour garder les runs pédagogiques prévisibles, les user ids **`u_999`** et **`u_777`** sont pilotés par une petite map **`SIMULATION`** (voir `error-handling.js`) :
 
-- **`u_demo_workflow`** in the text triggers **`policy_guard`**.
-- **`SKIP_LLM_DEGRADED u_777`** skips the LLM, enters degraded mode, and uses **`u_777`** so primary and fallback both fail in a reproducible way.
+- **`u_demo_workflow`** dans le texte déclenche **`policy_guard`**.
+- **`SKIP_LLM_DEGRADED u_777`** skip le LLM, entre en mode dégradé, et utilise **`u_777`** pour que primary et fallback échouent tous les deux de manière reproductible.
 
-### Why this pattern scales
+### Pourquoi ce pattern scale
 
-- **Consistency**: every failure is shaped the same way; unknown errors are normalized before handling
-- **Observability**: metrics/alerts group by `code` and by workflow `step`
-- **Safety**: sensitive/provider-specific details stay out of user messages
-- **Resilience**: transient issues recover automatically; hard failures degrade or surface as a single workflow-level error with preserved **`cause`**
+- **Cohérence** : chaque échec est façonné de la même manière ; les erreurs inconnues sont normalisées avant traitement
+- **Observabilité** : les metrics/alertes groupent par `code` et par `step` de workflow
+- **Sécurité** : les détails sensibles/spécifiques au provider restent hors des messages utilisateur
+- **Résilience** : les problèmes transitoires se récupèrent automatiquement ; les échecs hard dégradent ou surfacent une seule erreur au niveau workflow avec **`cause`** préservée
