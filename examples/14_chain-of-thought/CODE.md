@@ -1,6 +1,6 @@
-# Code explanation: `chain-of-thought.js`
+# Explication du Code : `chain-of-thought.js`
 
-This walkthrough maps each CoT phase to the actual functions in the file.
+Cette walkthrough mappe chaque phase CoT aux fonctions réelles du fichier.
 
 ## Run
 
@@ -10,19 +10,19 @@ node examples/14_chain-of-thought/chain-of-thought.js
 
 ---
 
-## 1) Setup: model, input case, and schemas
+## 1) Setup : model, cas d'input et schemas
 
-At the top of the file:
+En haut du fichier :
 
-- `RETURN_CASE` defines the customer request.
-- `RETURN_POLICY` defines hard business constraints.
-- `factsSchema`, `redFlagsSchema`, `legitimacySchema`, `policySchema`, `decisionSchema` define the JSON contract for each phase.
-- `promptJson(schema, userText)` is the shared utility that:
-  - resets chat history,
-  - enforces schema grammar,
-  - parses and repairs JSON safely.
+- `RETURN_CASE` définit la requête client.
+- `RETURN_POLICY` définit les contraintes business hard.
+- `factsSchema`, `redFlagsSchema`, `legitimacySchema`, `policySchema`, `decisionSchema` définissent le contrat JSON pour chaque phase.
+- `promptJson(schema, userText)` est la utility partagée qui :
+  - reset l'historique de chat,
+  - impose la grammar de schema,
+  - parse et répare le JSON en sécurité.
 
-This gives each phase function a strict output shape.
+Cela donne à chaque fonction de phase une forme de sortie stricte.
 
 ```js
 const RETURN_CASE = {
@@ -49,20 +49,20 @@ async function promptJson(schema, userText) {
 
 ---
 
-## 2) Phase 1 (Facts): `extractFacts()`
+## 2) Phase 1 (Facts) : `extractFacts()`
 
-`extractFacts(returnCase)` asks for:
+`extractFacts(returnCase)` demande :
 
-- only explicit facts,
-- no scoring,
-- no judgment.
+- uniquement les faits explicites,
+- pas de scoring,
+- pas de jugement.
 
-It returns:
+Il retourne :
 
 - `extracted_facts`
 - `missing_information`
 
-This protects against early bias before risk reasoning starts.
+Cela protège contre le biais précoce avant que le raisonnement de risque ne commence.
 
 ```js
 async function extractFacts(returnCase) {
@@ -80,17 +80,17 @@ ${JSON.stringify(returnCase, null, 2)}`
 
 ---
 
-## 3) Phase 2 (Red Flags): `screenRedFlags()`
+## 3) Phase 2 (Red Flags) : `screenRedFlags()`
 
-`screenRedFlags(returnCase, facts)` performs explicit fraud screening with fixed checkpoints.
+`screenRedFlags(returnCase, facts)` effectue un screening fraud explicite avec des checkpoints fixes.
 
-Output:
+Sortie :
 
-- `checkpoints[]` with `present/not_present/unclear`
+- `checkpoints[]` avec `present/not_present/unclear`
 - `fraud_score`
 - `fraud_rationale`
 
-The important part is checklist coverage, not just one final score.
+La partie importante est la couverture checklist, pas juste un score final.
 
 ```js
 async function screenRedFlags(returnCase, facts) {
@@ -112,21 +112,21 @@ Use these checkpoints:
 
 ---
 
-## 4) Phase 3 (Legitimacy): `assessLegitimacy()`
+## 4) Phase 3 (Legitimacy) : `assessLegitimacy()`
 
-`assessLegitimacy(returnCase, facts)` builds the customer-side argument:
+`assessLegitimacy(returnCase, facts)` construit l'argument côté client :
 
-- plausible defect indicators,
-- fairness/context factors,
-- supporting evidence quality.
+- indicateurs de défaut plausibles,
+- facteurs d'équité/contexte,
+- qualité des preuves de soutien.
 
-Output:
+Sortie :
 
 - `customer_supporting_points[]`
 - `legitimacy_score`
 - `legitimacy_rationale`
 
-Without this phase, risk logic tends to dominate every borderline case.
+Sans cette phase, la logique de risque tend à dominer chaque cas borderline.
 
 ```js
 async function assessLegitimacy(returnCase, facts) {
@@ -142,20 +142,20 @@ Do not reference fraud score. Focus on fairness and plausible product failure.`
 
 ---
 
-## 5) Phase 4 (Policy): `checkPolicy()`
+## 5) Phase 4 (Policy) : `checkPolicy()`
 
-`checkPolicy(returnCase, policy, redFlags, legitimacy)` applies hard rules:
+`checkPolicy(returnCase, policy, redFlags, legitimacy)` applique les règles hard :
 
 - return window
-- value thresholds
+- seuils de valeur
 - return-history triggers
 
-Output:
+Sortie :
 
-- per-rule statuses in `policy_checks[]`
+- statuts par règle dans `policy_checks[]`
 - `policy_outcome` (`approve`, `reject`, `manual_review`)
 
-This is the governance gate between analysis and action.
+C'est le portail de gouvernance entre l'analyse et l'action.
 
 ```js
 async function checkPolicy(returnCase, policy, redFlags, legitimacy) {
@@ -175,11 +175,11 @@ Legitimacy score: ${legitimacy.legitimacy_score}`
 
 ---
 
-## 6) Phase 5 (Decision): `makeDecision()`
+## 6) Phase 5 (Decision) : `makeDecision()`
 
-`makeDecision(...)` can decide only after all prior phases.
+`makeDecision(...)` peut décider uniquement après toutes les phases précédentes.
 
-Output:
+Sortie :
 
 - `final_decision`
 - `confidence`
@@ -187,7 +187,7 @@ Output:
 - `customer_message`
 - `internal_note`
 
-The prompt explicitly references conflict handling (for example fraud 6/10 vs legitimacy 7/10), so the result must explain how policy resolves the tension.
+Le prompt référence explicitement la gestion de conflit (par exemple fraud 6/10 vs legitimacy 7/10), donc le résultat doit expliquer comment la policy résout la tension.
 
 ```js
 async function makeDecision(returnCase, phase1Facts, redFlags, legitimacy, policyResult) {
@@ -203,9 +203,9 @@ show how policy resolves it.`
 
 ---
 
-## 7) Orchestration flow: `runChainOfThoughtReturnDecision()`
+## 7) Flux d'Orchestration : `runChainOfThoughtReturnDecision()`
 
-The main controller executes phases in strict order:
+Le contrôleur principal exécute les phases dans un ordre strict :
 
 1. facts
 2. red flags
@@ -213,11 +213,11 @@ The main controller executes phases in strict order:
 4. policy check
 5. final decision
 
-Then it prints a compact report and writes a browser visualization via:
+Puis il affiche un rapport compact et écrit une visualisation navigateur via :
 
 - `writeCoTReturnVisualization(...)`
 
-This keeps the core file focused on CoT logic.
+Cela garde le fichier core focalisé sur la logique CoT.
 
 ```js
 async function runChainOfThoughtReturnDecision(returnCase, policy) {
@@ -235,24 +235,24 @@ async function runChainOfThoughtReturnDecision(returnCase, policy) {
 
 ---
 
-## 8) Adapting the implementation per model class
+## 8) Adapter l'implémentation par classe de model
 
-The current code uses `Qwen3-1.7B-Q8_0.gguf`, which can run as both a reasoning and a non-reasoning model. The 5-phase scaffolding is designed to work for either class - but the way you tune it differs.
+Le code actuel utilise `Qwen3-1.7B-Q8_0.gguf`, qui peut tourner aussi bien en model de reasoning qu'en model non-reasoning. Le scaffolding 5-phases est conçu pour fonctionner avec les deux classes — mais la façon de le tuner diffère.
 
-For the conceptual side of this distinction, see the "CoT with reasoning vs non-reasoning LLMs" section in [CONCEPT.md](CONCEPT.md).
+Pour le côté conceptuel de cette distinction, voir la section "CoT with reasoning vs non-reasoning LLMs" dans [CONCEPT.md](CONCEPT.md).
 
-### What the current code assumes
+### Ce que le code actuel assume
 
-- A hybrid model that may or may not reason internally.
-- Per-phase JSON schemas via `promptJson(...)`.
-- Low `temperature` (0.2) and a generous `maxTokens` budget per phase.
-- One isolated chat history per phase via `session.resetChatHistory()`.
+- Un model hybrid qui peut ou non raisonner internally.
+- Des schemas JSON par phase via `promptJson(...)`.
+- Une `temperature` basse (0.2) et un budget `maxTokens` généreux par phase.
+- Un historique de chat isolé par phase via `session.resetChatHistory()`.
 
-This is intentionally a middle-ground configuration so the example works without forcing readers to download a specific model.
+C'est intentionnellement une configuration middle-ground pour que l'exemple fonctionne sans forcer les lecteurs à télécharger un model spécifique.
 
-### Tuning for non-reasoning models
+### Tuning pour les models non-reasoning
 
-If you swap in a base/chat model without internal reasoning (Llama-3 chat, Phi, Mistral-instruct, Qwen3 with `thoughts: "discourage"`):
+Si on swappe pour un model base/chat sans raisonnement interne (Llama-3 chat, Phi, Mistral-instruct, Qwen3 avec `thoughts: "discourage"`) :
 
 ```js
 const raw = await session.prompt(userText, {
@@ -262,14 +262,14 @@ const raw = await session.prompt(userText, {
 });
 ```
 
-- Lower `temperature` further (0.05 - 0.15). Borderline cases regress badly with creative sampling.
-- Increase `maxTokens` per phase. The model often needs room to "talk to itself" inside the JSON before it commits to scores.
-- Keep schemas strict. Avoid wide free-form fields; replace them with enums, fixed-length arrays, or short bounded strings.
-- Add explicit examples to phase prompts ("Example checkpoint: { check, status, evidence }"). Non-reasoning models latch on to format examples much faster than abstract specs.
+- Baisser la `temperature` encore (0.05 - 0.15). Les cas borderline régressent fortement avec du sampling créatif.
+- Augmenter `maxTokens` par phase. Le model a souvent besoin de place pour "parler seul" dans le JSON avant de s'engager sur des scores.
+- Garder les schemas stricts. Éviter les champs free-form larges ; les remplacer par des enums, tableaux de longueur fixe ou strings courtes bornées.
+- Ajouter des exemples explicites aux phase prompts ("Example checkpoint: { check, status, evidence }"). Les models non-reasoning lachent sur les exemples de format bien plus vite que sur des specs abstraites.
 
-### Tuning for reasoning models
+### Tuning pour les models de reasoning
 
-If you swap in a reasoning-tuned model (o3, DeepSeek-R1, Qwen3 with `thoughts: "auto"`, Claude Extended Thinking via API):
+Si on swappe pour un model tuning reasoning (o3, DeepSeek-R1, Qwen3 avec `thoughts: "auto"`, Claude Extended Thinking via API) :
 
 ```js
 const raw = await session.prompt(userText, {
@@ -279,14 +279,14 @@ const raw = await session.prompt(userText, {
 });
 ```
 
-- Shorten phase prompts. The model already reasons internally; verbose instructions add noise.
-- Lower `maxTokens` for purely structural phases (Facts, Policy Check). They do not need long thinking budgets.
-- Keep schemas as a **contract**, not as a reasoning crutch. Their main job here is downstream interoperability.
-- If the runtime supports it, log the internal reasoning trace for debugging only - never as part of the audit trail.
+- Raccourcir les phase prompts. Le model raisonne déjà internally ; les instructions verbose ajoutent du bruit.
+- Baisser `maxTokens` pour les phases purement structurelles (Facts, Policy Check). Elles n'ont pas besoin de longs budgets de pensée.
+- Garder les schemas comme un **contrat**, pas comme une béquille de raisonnement. Leur rôle principal ici est l'interopérabilité downstream.
+- Si le runtime le supporte, logger la trace de raisonnement interne pour le debugging uniquement — jamais comme partie de l'audit trail.
 
-### Qwen3 specifics
+### Spécificités Qwen3
 
-For `node-llama-cpp`, the clean switch for Qwen thought behavior is the wrapper option:
+Pour `node-llama-cpp`, le switch clean pour le comportement de pensée Qwen est l'option wrapper :
 
 ```js
 import { QwenChatWrapper } from "node-llama-cpp";
@@ -301,34 +301,34 @@ const nonReasoningWrapper = new QwenChatWrapper({
 });
 ```
 
-Then create the chat session with the wrapper you want for that phase/run:
+Puis créer la chat session avec le wrapper voulu pour cette phase/run :
 
 ```js
 const session = new LlamaChatSession({
     contextSequence: context.getSequence(),
     systemPrompt,
-    chatWrapper: reasoningWrapper // or nonReasoningWrapper
+    chatWrapper: reasoningWrapper // ou nonReasoningWrapper
 });
 ```
 
-A useful pattern is mixing wrapper modes per phase:
+Un pattern utile est de mélanger les modes wrapper par phase :
 
-- `thoughts: "discourage"` on Phase 1 (Facts) and Phase 4 (Policy Check) - mechanical work.
-- `thoughts: "auto"` on Phase 2 (Red Flags), Phase 3 (Legitimacy), and Phase 5 (Decision) - judgment work.
+- `thoughts: "discourage"` sur Phase 1 (Facts) et Phase 4 (Policy Check) — travail mécanique.
+- `thoughts: "auto"` sur Phase 2 (Red Flags), Phase 3 (Legitimacy) et Phase 5 (Decision) — travail de jugement.
 
-This keeps total latency low while preserving reasoning where it matters.
+Cela garde la latence totale basse tout en préservant le raisonnement où il compte.
 
-### Per-phase callouts
+### Callouts par phase
 
-- **Phase 1 (Facts)** - non-reasoning models often hallucinate fact entries that look plausible but were never in the input. Tighten the schema (`minItems`, enum-like fields) and instruct explicitly: "Do not infer."
-- **Phase 2 (Red Flags)** - reasoning models tend to over-suspect when given a fraud framing. Anchor them with the fixed checkpoint list rather than open-ended red flag generation.
-- **Phase 3 (Legitimacy)** - this phase exists exactly to counter Phase 2's bias. Do not collapse it into Phase 2 to save tokens, regardless of model class. It is a structural counterweight.
-- **Phase 4 (Policy Check)** - both classes benefit from injecting the policy as inline JSON rather than describing it in prose. Reduces drift and silent rule invention.
-- **Phase 5 (Decision)** - confidence calibration differs sharply between classes. A `confidence: 0.79` from a reasoning model is not directly comparable to `0.79` from a base model. Treat confidence as model-internal; route on `final_decision` and `policy_outcome` instead.
+- **Phase 1 (Facts)** — les models non-reasoning hallucinent souvent des entrées de fait qui ont l'air plausibles mais qui n'étaient jamais dans l'input. Resserir le schema (`minItems`, champs de type enum) et instructer explicitement : "Do not infer."
+- **Phase 2 (Red Flags)** — les models de reasoning ont tendance à trop suspecter quand on leur donne un framing fraud. Les ancrer avec la liste de checkpoints fixes plutôt que la génération de red flags open-ended.
+- **Phase 3 (Legitimacy)** — cette phase existe exactement pour contrer le biais de la Phase 2. Ne pas la fusionner dans la Phase 2 pour économiser des tokens, peu importe la classe de model. C'est un contrepoids structurel.
+- **Phase 4 (Policy Check)** — les deux classes bénéficient d'injecter la policy comme JSON inline plutôt que de la décrire en prose. Réduit le drift et l'invention silencieuse de règles.
+- **Phase 5 (Decision)** — la calibration de confidence diffère fortement entre classes. Un `confidence: 0.79` d'un model de reasoning n'est pas directement comparable à `0.79` d'un model base. Traiter la confidence comme model-internal ; router sur `final_decision` et `policy_outcome` à la place.
 
 ---
 
-## Suggested code-reading order
+## Ordre Suggéré de Lecture du Code
 
 1. `promptJson`
 2. `extractFacts`
@@ -338,4 +338,4 @@ This keeps total latency low while preserving reasoning where it matters.
 6. `makeDecision`
 7. `runChainOfThoughtReturnDecision`
 
-That sequence mirrors runtime and makes the example easy to reason about.
+Cette séquence mirror le runtime et rend l'exemple facile à raisonner.
