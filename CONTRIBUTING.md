@@ -1,118 +1,118 @@
-# Contributing Guidelines
+# Lignes directrices pour contribuer
 
-Thank you for considering contributing to AI Agents from Scratch!
+Merci d'envisager de contribuer à AI Agents from Scratch !
 
-## Project Philosophy
+## Philosophie du Projet
 
-This repository teaches AI agent fundamentals by building from scratch. Every contribution should support this learning mission.
+Ce dépôt enseigne les fondamentaux des AI agents en construisant à partir de zéro. Chaque contribution doit soutenir cette mission pédagogique.
 
-**Core Principles:**
-- **Clarity over cleverness** - Code should be easy to understand
-- **Fundamentals first** - No black boxes or magic
-- **Progressive learning** - Each example builds on the previous
-- **Local-first** - No API dependencies
+**Principes fondamentaux :**
+- **Clarté avant ingéniosité** - Le code doit être facile à comprendre
+- **Les fondamentaux d'abord** - Pas de boîtes noires ni de magie
+- **Apprentissage progressif** - Chaque exemple s'appuie sur le précédent
+- **Local d'abord** - Aucune dépendance API
 
-## Types of Contributions
+## Types de Contributions
 
-### Bug Reports
-Found something broken? Open an issue with:
-- Which example (`intro/`, `react-agent/`, etc.)
-- What you expected vs. what happened
-- Your environment (Node version, OS, model used)
-- Steps to reproduce
+### Signalement de bugs
+Vous avez trouvé quelque chose de cassé ? Ouvrez une issue avec :
+- L'exemple concerné (`intro/`, `react-agent/`, etc.)
+- Ce que vous attendiez vs ce qui s'est passé
+- Votre environnement (version Node, OS, model utilisé)
+- Étapes pour reproduire le problème
 
-### Documentation Improvements
-- Typos and grammar fixes
-- Clearer explanations
-- Better code comments
-- Additional examples in documentation
-- Diagrams and visualizations
+### Améliorations de la documentation
+- Fautes de frappe et corrections grammaticales
+- Explications plus claires
+- Meilleurs commentaires dans le code
+- Exemples supplémentaires dans la documentation
+- Diagrammes et visualisations
 
-### New Examples
-Want to add a new agent pattern? Great! Please:
-1. **Open an issue first** - let's discuss if it fits
-2. Follow the existing structure:
-- `pattern-name/pattern-name.js` - Working code
-- `pattern-name/CODE.md` - Detailed code walkthrough
-- `pattern-name/CONCEPT.md` - Why it matters, use cases
-3. Keep it simple and well-commented
-4. Test thoroughly with at least one model
+### Nouveaux exemples
+Vous souhaitez ajouter un nouveau pattern d'agent ? Parfait ! Veuillez :
+1. **Ouvrez une issue d'abord** - discutons pour voir si ça s'insère bien
+2. Suivez la structure existante :
+   - `pattern-name/pattern-name.js` - Code fonctionnel
+   - `pattern-name/CODE.md` - Explication détaillée du code
+   - `pattern-name/CONCEPT.md` - Pourquoi c'est important, cas d'usage
+3. Gardez-le simple et bien commenté
+4. Testez soigneusement avec au moins un model
 
-### Code Improvements
-- Performance optimizations (with benchmarks)
-- Better error handling
-- Clearer variable names
-- More helpful console output
+### Améliorations de code
+- Optimisations de performance (avec benchmarks)
+- Meilleure gestion des erreurs
+- Noms de variables plus clairs
+- Sorties console plus utiles
 
-## What We're Not Looking For
+## Ce Que Nous Ne Cherchons Pas
 
-- Framework integrations (LangChain, etc.) - this repo teaches what they do
-- Cloud API examples - keep it local
-- Production features (monitoring, scaling) - this is educational
-- Complex abstractions - keep it beginner-friendly
+- Intégrations de framework (LangChain, etc.) - ce dépôt enseigne ce qu'ils font
+- Exemples d'API cloud - gardez-le local
+- Fonctionnalités de production (monitoring, scaling) - c'est éducatif
+- Abstractions complexes - gardez-le accessible aux débutants
 
-## Contribution Process
+## Processus de Contribution
 
-1. **Fork** the repository
-2. **Create a branch**: `git checkout -b fix/issue-description`
-3. **Make changes** and test thoroughly
-4. **Commit** with clear messages: `git commit -m "Fix: clarify ReAct loop explanation"`
-5. **Push**: `git push origin fix/issue-description`
-6. **Open a Pull Request** with:
-- Clear title
-- Description of what changed and why
-- Which issue it addresses (if any)
+1. **Fork** le dépôt
+2. **Créez une branche** : `git checkout -b fix/description-du-problème`
+3. **Apportez vos modifications** et testez soigneusement
+4. **Commit** avec des messages clairs : `git commit -m "Fix: clarifier l'explication de la boucle ReAct"`
+5. **Push** : `git push origin fix/description-du-problème`
+6. **Ouvrez un Pull Request** avec :
+   - Titre clair
+   - Description des changements et de leur raison
+   - L'issue adressée (le cas échéant)
 
-## Code Standards
+## Standards de Code
 
-- Use clear, descriptive variable names
-- Add comments explaining *why*, not just *what*
-- Follow existing code style (no linter, just match the patterns)
-- Keep examples self-contained (one file when possible)
-- Test with Qwen or Llama models before submitting
+- Utilisez des noms de variables clairs et descriptifs
+- Ajoutez des commentaires expliquant *pourquoi*, pas seulement *quoi*
+- Respectez le style de code existant (pas de linter, suivez simplement les patterns)
+- Gardez les exemples autonomes (un fichier quand c'est possible)
+- Testez avec les models Qwen ou Llama avant de soumettre
 
-## Documentation Standards
+## Standards de Documentation
 
-- Use clear, simple language
-- Explain concepts before code
-- Include diagrams where helpful (ASCII art is fine!)
-- Provide real-world use cases
-- Link to related examples
+- Utilisez un langage clair et simple
+- Expliquez les concepts avant le code
+- Incluez des diagrammes quand utile (l'art ASCII est acceptable !)
+- Fournissez des cas d'usage réels
+- Liez vers les exemples connexes
 
-## Example Structure
+## Structure d'un Exemple
 ```
 new-pattern/
-├── new-pattern.js # The working code
-├── CODE.md # Line-by-line walkthrough
-└── CONCEPT.md # High-level explanation
+├── new-pattern.js # Le code fonctionnel
+├── CODE.md # Explication ligne par ligne
+└── CONCEPT.md # Explication de haut niveau
 ```
 
-**CODE.md should include:**
-- Prerequisites
-- Step-by-step code breakdown
-- How to run it
-- Expected output
+**CODE.md doit inclure :**
+- Prérequis
+- Analyse détaillée du code étape par étape
+- Comment l'exécuter
+- Sortie attendue
 
-**CONCEPT.md should include:**
-- What problem it solves
-- Why this pattern matters
-- Real-world applications
-- Simple diagrams
+**CONCEPT.md doit inclure :**
+- Quel problème il résout
+- Pourquoi ce pattern est important
+- Applications réelles
+- Diagrammes simples
 
-## Getting Help
+## Obtenir de l'Aide
 
-- Not sure if your idea fits? **Open an issue to discuss**
-- Stuck on implementation? **Ask in the issue**
-- Want to pair on something? **Reach out!**
+- Vous ne savez pas si votre idée correspond ? **Ouvrez une issue pour discuter**
+- Bloqué sur l'implémentation ? **Posez votre question dans l'issue**
+- Vous voulez travailler à deux sur quelque chose ? **Contactez-nous !**
 
-## License
+## Licence
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (MIT).
+En contribuant, vous acceptez que vos contributions seront sous la même licence que le projet (MIT).
 
-## Recognition
+## Reconnaissance
 
-All contributors will be recognized in the README. Thank you for helping others learn!
+Tous les contributeurs seront reconnus dans le README. Merci d'aider les autres à apprendre !
 
 ---
 
-**Questions?** Open an issue or reach out. Happy to help guide your contribution! 
+**Des questions ?** Ouvrez une issue ou contactez-nous. Heureux d'aider guider votre contribution ! 
