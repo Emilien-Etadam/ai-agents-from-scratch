@@ -1,6 +1,6 @@
-# Code explanation: `tree-of-thought.js`
+# Explication du Code : `tree-of-thought.js`
 
-This walkthrough follows the actual code structure, so you can map each ToT concept to concrete functions.
+Cette walkthrough suit la structure réelle du code, pour que vous puissiez mapper chaque concept ToT à des fonctions concrètes.
 
 ## Run
 
@@ -10,112 +10,112 @@ node examples/12_tree-of-thought/tree-of-thought.js
 
 ---
 
-## 1) Setup: model, schemas, constants
+## 1) Setup : model, schemas, constantes
 
-At the top of the file:
+En haut du fichier :
 
-- `HYPOTHESIS_TYPES` defines the four competing branches.
-- `BEHAVIOR_INPUT` is the case description.
-- `hypothesisSchema`, `scoreSchema`, `rankingSchema`, `analysisSchema` define the JSON contracts for each phase.
-- `promptJson(schema, userText)` is the shared utility that:
-  - resets chat history,
-  - enforces schema grammar,
-  - parses/repairs JSON.
+- `HYPOTHESIS_TYPES` définit les quatre branches concurrentes.
+- `BEHAVIOR_INPUT` est la description du cas.
+- `hypothesisSchema`, `scoreSchema`, `rankingSchema`, `analysisSchema` définissent les contrats JSON pour chaque phase.
+- `promptJson(schema, userText)` est la utility partagée qui :
+  - reset l'historique de chat,
+  - impose la grammar de schema,
+  - parse/répare le JSON.
 
-This keeps each phase function focused on logic, not parser boilerplate.
+Cela garde chaque fonction de phase focalisée sur la logique, pas sur le boilerplate de parser.
 
 ---
 
-## 2) Phase 1 (Branch): `developHypothesis()`
+## 2) Phase 1 (Branch) : `developHypothesis()`
 
-`developHypothesis(behavior, hypothesisType)` does one thing:
+`developHypothesis(behavior, hypothesisType)` fait une seule chose :
 
-- prompts the model to reason through exactly one lens,
-- returns a structured object:
+- prompt le model pour raisonner à travers exactement un lens,
+- retourne un objet structuré :
   - `name`
   - `argument`
   - `signals`
   - `counter_evidence`
 
-In `runTreeOfThoughtMotivationAnalysis()`, this runs in a loop over `HYPOTHESIS_TYPES`, creating four competing branches.
+Dans `runTreeOfThoughtMotivationAnalysis()`, ça tourne dans une boucle sur `HYPOTHESIS_TYPES`, créant quatre branches concurrentes.
 
 ---
 
-## 3) Phase 2 (Score): `scoreHypothesis()` + `rerankHypotheses()`
+## 3) Phase 2 (Score) : `scoreHypothesis()` + `rerankHypotheses()`
 
-### Raw per-branch scoring
+### Scoring raw par branche
 
-`scoreHypothesis(behavior, hypothesis)` returns:
+`scoreHypothesis(behavior, hypothesis)` retourne :
 
-- `score` (raw numeric score from formula),
+- `score` (score numérique raw de la formule),
 - `details` (`explanatory_power`, `plausibility`, `falsifiability`),
 - `blindSpot`,
 - `reasoning`.
 
-### Anti-tie calibration pass
+### Pass de calibration anti-égalité
 
-`rerankHypotheses(behavior, scoredHypotheses)` forces a strict ranking with no ties and then maps ranks to calibrated scores:
+`rerankHypotheses(behavior, scoredHypotheses)` force un ranking strict sans égalités puis map les rangs en scores calibrés :
 
 - rank1 -> `8.8`
 - rank2 -> `8.1`
 - rank3 -> `7.4`
 - rank4 -> `6.7`
 
-This is why the console shows:
+C'est pourquoi la console affiche :
 
-- captured raw evaluations
-- then calibrated scores used for pruning
+- les évaluations raw capturées
+- puis les scores calibrés utilisés pour le pruning
 
-So learners see what the system *actually* uses for branch selection.
-
----
-
-## 4) Phase 3 (Prune): `pruneHypotheses()`
-
-`pruneHypotheses(scoredHypotheses)`:
-
-- sorts descending by score,
-- keeps the winner,
-- returns `discarded` branches.
-
-This is the structural heart of ToT in this example: one winner continues, alternatives are dropped.
+Les apprenants voient ainsi ce que le système utilise *vraiment* pour la sélection de branche.
 
 ---
 
-## 5) Phase 4 (Conclusion): `createConclusion()`
+## 4) Phase 3 (Prune) : `pruneHypotheses()`
 
-`createConclusion(behavior, winner)` builds the final analysis using only:
+`pruneHypotheses(scoredHypotheses)` :
 
-- winner name
-- winner argument
-- winner signals
+- trie par score décroissant,
+- garde le winner,
+- retourne les branches `discarded`.
 
-Discarded branches do not feed into the final answer.  
-That intentional limitation is shown in the console block: `WHAT TOT LOST IN THIS RUN`.
+C'est le cœur structurel du ToT dans cet exemple : un winner continue, les alternatives sont éliminées.
 
 ---
 
-## 6) Orchestration flow: `runTreeOfThoughtMotivationAnalysis()`
+## 5) Phase 4 (Conclusion) : `createConclusion()`
 
-This function is the end-to-end controller:
+`createConclusion(behavior, winner)` construit l'analyse finale en utilisant uniquement :
 
-1. branch (collect hypotheses)
-2. score (raw + calibrated)
+- le nom du winner
+- l'argument du winner
+- les signals du winner
+
+Les branches éliminées ne nourrissent pas la réponse finale.
+Cette limitation intentionnelle est montrée dans le bloc console : `WHAT TOT LOST IN THIS RUN`.
+
+---
+
+## 6) Flux d'Orchestration : `runTreeOfThoughtMotivationAnalysis()`
+
+Cette fonction est le contrôleur end-to-end :
+
+1. branch (collecter les hypothèses)
+2. score (raw + calibré)
 3. prune (winner + discarded)
-4. conclude (winner only)
-5. print output + call visualization helper
+4. conclude (winner uniquement)
+5. afficher la sortie + appeler le helper de visualisation
 
-Visualization is intentionally delegated to:
+La visualisation est intentionnellement déléguée à :
 
 - `writeToTMotivationVisualization(...)`
 
-so the example file stays focused on ToT control flow.
+pour que le fichier exemple reste focalisé sur le flow de contrôle ToT.
 
 ---
 
-## Suggested code-reading order
+## Ordre Suggéré de Lecture du Code
 
-Read functions in this sequence:
+Lire les fonctions dans cet ordre :
 
 1. `promptJson`
 2. `developHypothesis`
@@ -125,4 +125,4 @@ Read functions in this sequence:
 6. `createConclusion`
 7. `runTreeOfThoughtMotivationAnalysis`
 
-That order mirrors the runtime flow and makes the file much easier to understand.
+Cet ordre mirror le flow runtime et rend le fichier beaucoup plus facile à comprendre.
