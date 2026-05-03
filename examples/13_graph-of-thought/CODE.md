@@ -1,6 +1,6 @@
-# Code explanation: `graph-of-thought.js`
+# Explication du Code : `graph-of-thought.js`
 
-This is a code-first walkthrough of the GoT implementation used in Example 13.
+C'est une walkthrough code-first de l'implémentation GoT utilisée dans l'Exemple 13.
 
 ## Run
 
@@ -10,123 +10,123 @@ node examples/13_graph-of-thought/graph-of-thought.js
 
 ---
 
-## 1) Core graph object: `ThoughtGraph`
+## 1) Objet graphe central : `ThoughtGraph`
 
-`ThoughtGraph` is the central data structure.
+`ThoughtGraph` est la structure de données centrale.
 
-### Stored state
+### State stocké
 
 - `nodes: Map<string, node>`
 - `edges: Map<string, parentId[]>`
-- `nextId` for sequential node ids (`n1`, `n2`, ...)
+- `nextId` pour les IDs de nœuds séquentiels (`n1`, `n2`, ...)
 
-### Key methods
+### Méthodes clés
 
 - `addNode(type, content, meta, parentIds)`
 - `get(id)`
 - `parents(id)`
 - `byType(type)`
-- `printGraph()` (debug trace of all nodes + edges)
+- `printGraph()` (trace debug de tous les nœuds + edges)
 
-This is what makes the example truly graph-based instead of tree-based.
-
----
-
-## 2) Shared JSON call utility: `promptJson()`
-
-`promptJson(schema, userText)` is reused by every operation:
-
-- resets chat history,
-- enforces schema grammar,
-- parses JSON safely.
-
-All operation functions are then clean and focused on graph logic.
+C'est ce qui rend l'exemple vraiment basé sur un graphe au lieu d'un arbre.
 
 ---
 
-## 3) Phase functions (and the node type each creates)
+## 2) Utility d'appel JSON partagée : `promptJson()`
 
-### `branch(...)` -> `hypothesis` nodes
+`promptJson(schema, userText)` est réutilisée par chaque opération :
 
-- input: root behavior + hypothesis lenses
-- output: one node per lens
-- parent: always root
+- reset l'historique de chat,
+- impose la grammar de schema,
+- parse le JSON en sécurité.
 
-### `scoreAll(...)` -> updates `score` on hypothesis nodes
-
-- raw criterion scoring per hypothesis
-- strict reranking pass (no ties) with calibrated spread
-- writes score back into graph nodes
-
-### `contrast(...)` -> `contrast` node
-
-- input: two hypothesis nodes
-- output: contradiction node
-- parents: both compared nodes
-
-### `refine(...)` -> `refined` node
-
-- input: weak node + strong node/context
-- output: improved version of weak argument
-- parents: both source nodes
-
-### `aggregate(...)` -> `synthesis` node
-
-- input: multiple source nodes
-- output: integrated synthesis
-- parents: all source nodes
-
-### `conclude(...)` -> `conclusion` node
-
-- input: selected high-value strands
-- output: final integrated analysis
-- parents: multiple synthesis/contrast/refined nodes
+Toutes les fonctions d'opération sont ensuite propres et focalisées sur la logique de graphe.
 
 ---
 
-## 4) Controller flow: `runGoTMotivationAnalysis()`
+## 3) Fonctions de Phase (et le type de nœud que chacune crée)
 
-This function orchestrates everything:
+### `branch(...)` -> nœuds `hypothesis`
 
-1. create `root`
-2. branch into 4 hypotheses
-3. score + rerank hypotheses
-4. build contrast nodes
-5. refine weak/medium nodes
-6. create two synthesis nodes
-7. conclude from multiple strands
-8. print graph + final narrative + generate visualization
+- input : comportement root + lenses d'hypothèse
+- output : un nœud par lens
+- parent : toujours root
 
-The ranking step affects which nodes are considered `strongA`, `strongB`, `medium`, `weak`, which then influences contrast/refine selection.
+### `scoreAll(...)` -> met à jour `score` sur les nœuds hypothesis
+
+- scoring de critères raw par hypothèse
+- pass de reranking strict (pas d'égalités) avec spread calibré
+- écrit le score de retour dans les nœuds du graphe
+
+### `contrast(...)` -> nœud `contrast`
+
+- input : deux nœuds hypothesis
+- output : nœud de contradiction
+- parents : les deux nœuds comparés
+
+### `refine(...)` -> nœud `refined`
+
+- input : nœud faible + nœud fort/contexte
+- output : version améliorée de l'argument faible
+- parents : les deux nœuds sources
+
+### `aggregate(...)` -> nœud `synthesis`
+
+- input : multiple nœuds sources
+- output : synthèse intégrée
+- parents : tous les nœuds sources
+
+### `conclude(...)` -> nœud `conclusion`
+
+- input : strands de haute valeur sélectionnés
+- output : analyse finale intégrée
+- parents : multiple nœuds synthesis/contrast/refined
 
 ---
 
-## 5) Why this is GoT in code (not just in concept)
+## 4) Flow de Contrôleur : `runGoTMotivationAnalysis()`
 
-Look at parent arrays in `addNode(...)` calls:
+Cette fonction orchestre tout :
 
-- `contrast`: two parents
-- `refine`: two parents
-- `aggregate`: many parents
-- `conclusion`: many parents
+1. créer `root`
+2. brancher en 4 hypothèses
+3. scorer + reranker les hypothèses
+4. construire les nœuds contrast
+5. raffiner les nœuds faibles/moyens
+6. créer deux nœuds synthesis
+7. conclure depuis multiple strands
+8. afficher le graphe + narrative finale + générer la visualisation
 
-Multiple-parent nodes are impossible in strict tree search; they are the concrete code signature of GoT.
+L'étape de ranking affecte quels nœuds sont considérés `strongA`, `strongB`, `medium`, `weak`, ce qui influence ensuite la sélection contrast/refine.
 
 ---
 
-## 6) Visualization integration
+## 5) Pourquoi c'est du GoT dans le code (pas juste dans le concept)
 
-Visualization logic is intentionally extracted to helper code:
+Regarder les tableaux parent dans les appels `addNode(...)` :
+
+- `contrast` : deux parents
+- `refine` : deux parents
+- `aggregate` : plusieurs parents
+- `conclusion` : plusieurs parents
+
+Les nœuds à multiple parents sont impossibles dans un arbre strict ; c'est la signature concrète dans le code du GoT.
+
+---
+
+## 6) Intégration de Visualisation
+
+La logique de visualisation est intentionnellement extraite dans du code helper :
 
 - `writeGoTMotivationVisualization(...)`
 
-So this example file stays focused on graph operations and orchestration.
+Pour que ce fichier exemple reste focalisé sur les opérations de graphe et l'orchestration.
 
 ---
 
-## Suggested code-reading order
+## Ordre Suggéré de Lecture du Code
 
-1. `ThoughtGraph` class
+1. Classe `ThoughtGraph`
 2. `promptJson`
 3. `branch`
 4. `scoreAll`
@@ -136,4 +136,4 @@ So this example file stays focused on graph operations and orchestration.
 8. `conclude`
 9. `runGoTMotivationAnalysis`
 
-This gives you the same order as runtime execution and the cleanest learning path.
+Cela vous donne le même ordre que l'exécution runtime et le chemin d'apprentissage le plus clean.
