@@ -1,10 +1,10 @@
-# Code Explanation: aot-agent.js
+# Explication du Code : aot-agent.js
 
-This example demonstrates the **Atom of Thought** prompting pattern using a mathematical calculator as the domain.
+Cet exemple démontre le pattern de prompting **Atom of Thought** en utilisant une calculatrice mathématique comme domaine.
 
-## Three-Phase Architecture
+## Architecture en Trois Phases
 
-### Phase 1: Planning (LLM)
+### Phase 1 : Planification (LLM)
 ```javascript
 async function generatePlan(userPrompt) {
     const grammar = await llama.createGrammarForJsonSchema(planSchema);
@@ -13,13 +13,13 @@ async function generatePlan(userPrompt) {
 }
 ```
 
-**Key points:**
-- LLM outputs **structured JSON** (enforced by grammar)
-- LLM does NOT execute calculations
-- Each atom represents one operation
-- Dependencies are explicit (`dependsOn` array)
+**Points clés :**
+- Le LLM sort du **JSON structuré** (contraint par la grammar)
+- Le LLM n'exécute PAS les calculs
+- Chaque atom représente une opération
+- Les dépendances sont explicites (tableau `dependsOn`)
 
-**Example output:**
+**Exemple de sortie :**
 ```json
 {
   "atoms": [
@@ -31,11 +31,11 @@ async function generatePlan(userPrompt) {
 }
 ```
 
-### Phase 2: Validation (System)
+### Phase 2 : Validation (Système)
 ```javascript
 function validatePlan(plan) {
     const allowedTools = new Set(Object.keys(tools));
-    
+
     for (const atom of plan.atoms) {
         if (ids.has(atom.id)) throw new Error(`Duplicate ID`);
         if (atom.kind === "tool" && !allowedTools.has(atom.name)) {
@@ -45,19 +45,19 @@ function validatePlan(plan) {
 }
 ```
 
-**Validates:**
-- No duplicate atom IDs
-- Only allowed tools are referenced
-- Dependencies make sense
-- JSON structure is correct
+**Valide :**
+- Pas d'IDs d'atome dupliqués
+- Seuls les outils autorisés sont référencés
+- Les dépendances ont du sens
+- La structure JSON est correcte
 
-### Phase 3: Execution (System)
+### Phase 3 : Exécution (Système)
 ```javascript
 function executePlan(plan) {
     const state = {};
-    
+
     for (const atom of sortedAtoms) {
-        // Resolve dependencies
+        // Résoudre les dépendances
         let resolvedInput = {};
         for (const [key, value] of Object.entries(atom.input)) {
             if (value.startsWith('<result_of_')) {
@@ -65,43 +65,43 @@ function executePlan(plan) {
                 resolvedInput[key] = state[refId];
             }
         }
-        
-        // Execute
+
+        // Exécuter
         state[atom.id] = tools[atom.name](resolvedInput.a, resolvedInput.b);
     }
 }
 ```
 
-**Key behaviors:**
-- Executes atoms in order (sorted by ID)
-- Resolves `<result_of_N>` references from state
-- Each atom stores its result in `state[atom.id]`
-- Execution is **deterministic** (same plan + same state = same result)
+**Comportements clés :**
+- Exécute les atomes dans l'ordre (triés par ID)
+- Résout les références `<result_of_N>` depuis le state
+- Chaque atome stocke son résultat dans `state[atom.id]`
+- L'exécution est **deterministe** (même plan + même state = même résultat)
 
-## Why This Matters
+## Pourquoi Cela Compte
 
-### Comparison with ReAct
+### Comparaison avec ReAct
 
 | Aspect | ReAct | Atom of Thought |
 |--------|-------|-----------------|
-| **Planning** | Implicit (in LLM reasoning) | Explicit (JSON structure) |
-| **Execution** | LLM decides next step | System follows plan |
-| **Validation** | None | Before execution |
-| **Debugging** | Hard (trace through text) | Easy (inspect atoms) |
-| **Testing** | Hard (mock LLM) | Easy (test executor) |
-| **Failures** | May hallucinate | Fail at specific atom |
+| **Planification** | Implicite (dans le raisonnement LLM) | Explicite (structure JSON) |
+| **Exécution** | Le LLM décide la prochaine étape | Le système suit le plan |
+| **Validation** | Aucune | Avant l'exécution |
+| **Debugging** | Difficile (tracer dans le texte) | Facile (inspecter les atomes) |
+| **Tests** | Difficiles (mock le LLM) | Faciles (tester l'exécuteur) |
+| **Échecs** | Peut halluciner | Échec à un atome spécifique |
 
-### Benefits
+### Bénéfices
 
-1. **No hidden reasoning**: Every operation is an explicit atom
-2. **Testable**: Execute plan without LLM involvement
-3. **Debuggable**: Know exactly which atom failed
-4. **Auditable**: Plan is a data structure, not text
-5. **Deterministic**: Same input = same output (given same plan)
+1. **Pas de raisonnement caché** : Chaque opération est un atome explicite
+2. **Testable** : Exécuter le plan sans implication du LLM
+3. **Debuggable** : Savoir exactement quel atome a échoué
+4. **Auditable** : Le plan est une structure de données, pas du texte
+5. **Deterministe** : Même input = même output (avec le même plan)
 
-## Tool Implementation
+## Implémentation des Outils
 
-Tools are **pure functions** with no side effects:
+Les outils sont des **fonctions pures** sans effets de bord :
 ```javascript
 const tools = {
     add: (a, b) => {
@@ -109,70 +109,70 @@ const tools = {
         console.log(`EXECUTING: add(${a}, ${b}) = ${result}`);
         return result;
     },
-    // ... more tools
+    // ... plus d'outils
 };
 ```
 
-**Why pure functions?**
-- Easy to test
-- Easy to replay
-- No hidden state
-- Composable
+**Pourquoi des fonctions pures ?**
+- Faciles à tester
+- Faciles à rejouer
+- Pas de state caché
+- Composables
 
-## State Flow
+## Flux de State
 ```
-User Question
+Question Utilisateur
       ↓
-[LLM generates plan]
+[LLM génère un plan]
       ↓
-{atoms: [...]} ← JSON plan
+{atoms: [...]} ← Plan JSON
       ↓
-[System validates]
+[Le système valide]
       ↓
-Plan valid
+Plan valide
       ↓
-[System executes atom 1] → state[1] = result
+[Le système exécute l'atome 1] → state[1] = résultat
       ↓
-[System executes atom 2] → state[2] = result (uses state[1])
+[Le système exécute l'atome 2] → state[2] = résultat (utilise state[1])
       ↓
-[System executes atom 3] → state[3] = result (uses state[2])
+[Le système exécute l'atome 3] → state[3] = résultat (utilise state[2])
       ↓
-Final Answer
+Réponse Finale
 ```
 
-## Error Handling
+## Gestion d'Erreurs
 ```javascript
-// Atom validation fails → re-prompt LLM
-validatePlan(plan); // throws if invalid
+// La validation de l'atome échoue → re-prompter le LLM
+validatePlan(plan); // lève une erreur si invalide
 
-// Tool execution fails → stop at that atom
-if (b === 0) throw new Error("Division by zero");
+// L'exécution de l'outil échoue → s'arrêter à cet atome
+if (b === 0) throw new Error("Division par zéro");
 
-// Dependency missing → clear error message
+// Dépendance manquante → message d'erreur clair
 if (!(depId in state)) {
     throw new Error(`Atom ${atom.id} depends on incomplete atom ${depId}`);
 }
 ```
 
-## When to Use AoT
+## Quand Utiliser AoT
 
-✅ **Use AoT when:**
-- Execution must be auditable
-- Failures must be recoverable
-- Multiple steps with dependencies
-- Testing is important
-- Compliance matters
+✅ **Utiliser AoT quand :**
+- L'exécution doit être auditable
+- Les échecs doivent être récupérables
+- Étapes multiples avec dépendances
+- Les tests sont importants
+- La conformité compte
 
-❌ **Don't use AoT when:**
-- Single-step tasks
-- Creative/exploratory tasks
+❌ **Ne pas utiliser AoT quand :**
+- Tâches single-step
+- Tâches créatives/exploratoires
 - Brainstorming
-- Natural conversation
+- Conversation naturelle
 
-## Extension Ideas
+## Idées d'Extension
 
-1. **Add compensation atoms** for rollback
-2. **Add retry logic** per atom
-3. **Parallelize independent atoms** (atoms with no shared dependencies)
-4. **Persist plan** for debugging
-5. **Visualize atom graph** (dependency tree)
+1. **Ajouter des atomes de compensation** pour le rollback
+2. **Ajouter une logique de retry** par atome
+3. **Paralleliser les atomes indépendants** (atomes sans dépendances partagées)
+4. **Persister le plan** pour le debugging
+5. **Visualiser le graphe d'atomes** (arbre de dépendances)
