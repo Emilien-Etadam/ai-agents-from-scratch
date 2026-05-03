@@ -1,20 +1,20 @@
-# Code Explanation: react-agent.js
+# Explication du Code : react-agent.js
 
-This example implements the **ReAct pattern** (Reasoning + Acting), a powerful approach for multi-step problem-solving with tools.
+Cet exemple implémente le **pattern ReAct** (Reasoning + Acting), une approche puissante pour la résolution de problèmes en plusieurs étapes avec des outils.
 
-## What is ReAct?
+## Qu'est-ce que ReAct ?
 
 ReAct = **Rea**soning + **Act**ing
 
-The agent alternates between:
-1. **Thinking** (reasoning about what to do)
-2. **Acting** (using tools)
-3. **Observing** (seeing tool results)
-4. Repeat until problem is solved
+L'agent alterne entre :
+1. **Réfléchir** (raisonner sur ce qu'il faut faire)
+2. **Agir** (utiliser des outils)
+3. **Observer** (voir les résultats des outils)
+4. Répéter jusqu'à ce que le problème soit résolu
 
-## Key Components
+## Composants Clés
 
-### 1. ReAct System Prompt (Lines 20-52)
+### 1. System Prompt ReAct (lignes 20-52)
 ```javascript
 const systemPrompt = `You are a mathematical assistant that uses the ReAct approach.
 
@@ -30,15 +30,15 @@ Thought: [Once you have all information]
 Answer: [Final answer and STOP]
 ```
 
-**Key instructions:**
-- Explicit step-by-step pattern
-- One tool call at a time
-- Continue until final answer
-- Stop after "Answer:"
+**Instructions clés :**
+- Pattern explicite étape par étape
+- Un appel d'outil à la fois
+- Continuer jusqu'à la réponse finale
+- Arrêter après "Answer:"
 
-### 2. Calculator Tools (Lines 60-159)
+### 2. Outils Calculatrice (lignes 60-159)
 
-Four basic math operations:
+Quatre opérations mathématiques de base :
 ```javascript
 const add = defineChatSessionFunction({...});
 const multiply = defineChatSessionFunction({...});
@@ -46,22 +46,22 @@ const subtract = defineChatSessionFunction({...});
 const divide = defineChatSessionFunction({...});
 ```
 
-Each tool:
-- Takes two numbers (a, b)
-- Performs operation
-- Logs the call
-- Returns result as string
+Chaque outil :
+- Prend deux nombres (a, b)
+- Effectue l'opération
+- Loggue l'appel
+- Retourne le résultat sous forme de string
 
-### 3. ReAct Agent Loop (Lines 164-212)
+### 3. Boucle Agent ReAct (lignes 164-212)
 
 ```javascript
 async function reactAgent(userPrompt, maxIterations = 10) {
     let iteration = 0;
     let fullResponse = "";
-    
+
     while (iteration < maxIterations) {
         iteration++;
-        
+
         // Prompt the LLM
         const response = await session.prompt(
             iteration === 1 ? userPrompt : "Continue your reasoning.",
@@ -74,9 +74,9 @@ async function reactAgent(userPrompt, maxIterations = 10) {
                 }
             }
         );
-        
+
         fullResponse += currentChunk;
-        
+
         // Check if final answer reached
         if (response.toLowerCase().includes("answer:")) {
             return fullResponse;
@@ -85,110 +85,110 @@ async function reactAgent(userPrompt, maxIterations = 10) {
 }
 ```
 
-**How it works:**
-1. Loop up to maxIterations times
-2. On first iteration: send user's question
-3. On subsequent iterations: ask to continue
-4. Stream output in real-time
-5. Stop when "Answer:" appears
-6. Return full reasoning trace
+**Comment ça fonctionne :**
+1. Boucler jusqu'à maxIterations fois
+2. À la première itération : envoyer la question de l'utilisateur
+3. Aux itérations suivantes : demander de continuer
+4. Streamer la sortie en temps réel
+5. Arrêter quand "Answer:" apparaît
+6. Retourner la trace de raisonnement complète
 
-### 4. Example Query (Lines 215-220)
+### 4. Exemple de Requête (lignes 215-220)
 
 ```javascript
 const queries = [
-    "A store sells 15 items Monday at $8 each, 20 items Tuesday at $8 each, 
+    "A store sells 15 items Monday at $8 each, 20 items Tuesday at $8 each,
      10 items Wednesday at $8 each. What's the average items per day and total revenue?"
 ];
 ```
 
-Complex problem requiring multiple calculations:
+Problème complexe nécessitant plusieurs calculs :
 - 15 × 8
 - 20 × 8
 - 10 × 8
-- Sum results
-- Calculate average
-- Format answer
+- Sommer les résultats
+- Calculer la moyenne
+- Formater la réponse
 
-## The ReAct Flow
+## le Flux ReAct
 
-### Example Execution
+### Exécution d'Exemple
 
 ```
-USER: "A store sells 15 items at $8 each and 20 items at $8 each. Total revenue?"
+UTILISATEUR : "A store sells 15 items at $8 each and 20 items at $8 each. Total revenue?"
 
-Iteration 1:
-Thought: First I need to calculate 15 × 8
-Action: multiply(15, 8)
-Observation: 120
+Itération 1 :
+Thought : First I need to calculate 15 × 8
+Action : multiply(15, 8)
+Observation : 120
 
-Iteration 2:
-Thought: Now I need to calculate 20 × 8
-Action: multiply(20, 8)
-Observation: 160
+Itération 2 :
+Thought : Now I need to calculate 20 × 8
+Action : multiply(20, 8)
+Observation : 160
 
-Iteration 3:
-Thought: Now I need to add both results
-Action: add(120, 160)
-Observation: 280
+Itération 3 :
+Thought : Now I need to add both results
+Action : add(120, 160)
+Observation : 280
 
-Iteration 4:
-Thought: I have the total revenue
-Answer: The total revenue is $280
+Itération 4 :
+Thought : I have the total revenue
+Answer : The total revenue is $280
 ```
 
-**Loop stops** because "Answer:" was detected.
+**La boucle s'arrête** car "Answer:" a été détecté.
 
-## Why ReAct Works
+## Pourquoi ReAct Fonctionne
 
-### Traditional Approach (Fails)
+### Approche Traditionnelle (Échoue)
 ```
-User: "Complex math problem"
-LLM: [Tries to calculate in head]
-→ Often wrong due to arithmetic errors
-```
-
-### ReAct Approach (Succeeds)
-```
-User: "Complex math problem"
-LLM: "I need to calculate X"
-  → Calls calculator tool
-  → Gets accurate result
-  → Uses result for next step
-  → Continues until solved
+Utilisateur : "Problème math complexe"
+LLM : [Essaie de calculer dans sa tête]
+→ Souvent faux à cause d'erreurs arithmétiques
 ```
 
-## Key Concepts
-
-### 1. Explicit Reasoning
-The agent must "show its work":
+### Approche ReAct (Réussit)
 ```
-Thought: What do I need to do?
-Action: Do it
-Observation: What happened?
-```
-
-### 2. Tool Use at Each Step
-```
-Don't calculate: 15 × 8 = 120 (may be wrong)
-Do calculate: multiply(15, 8) → 120 (always correct)
+Utilisateur : "Problème math complexe"
+LLM : "J'ai besoin de calculer X"
+  → Appelle l'outil calculatrice
+  → Obtient un résultat précis
+  → Utilise le résultat pour l'étape suivante
+  → Continue jusqu'à résolution
 ```
 
-### 3. Iterative Problem Solving
+## Concepts Clés
+
+### 1. Raisonnement Explicite
+L'agent doit "montrer son travail" :
 ```
-Complex Problem → Break into steps → Solve each step → Combine results
+Thought : Qu'est-ce que j'ai à faire ?
+Action : Le faire
+Observation : Qu'est-ce qu'il s'est passé ?
 ```
 
-### 4. Self-Correction
-Agent can observe bad results and try again:
+### 2. Utilisation d'Outil à Chaque Étape
 ```
-Thought: That doesn't look right
-Action: Let me recalculate
+Ne pas calculer : 15 × 8 = 120 (peut être faux)
+Calculer : multiply(15, 8) → 120 (toujours correct)
 ```
 
-## Debug Output
+### 3. Résolution de Problème Itérative
+```
+Problème Complexe → Découper en étapes → Résoudre chaque étape → Combiner les résultats
+```
 
-The code includes PromptDebugger (lines 228-234):
+### 4. Auto-Correction
+L'agent peut observer de mauvais résultats et réessayer :
+```
+Thought : Ça ne semble pas correct
+Action : Recalculons
+```
+
+## Sortie de Debug
+
+Le code inclut PromptDebugger (lignes 228-234) :
 ```javascript
 const promptDebugger = new PromptDebugger({
     outputDir: './logs',
@@ -198,9 +198,9 @@ const promptDebugger = new PromptDebugger({
 await promptDebugger.debugContextState({session, model});
 ```
 
-Saves complete prompt history to logs for debugging.
+Sauvegarde l'historique complet des prompts dans les logs pour le debugging.
 
-## Expected Output
+## Sortie Attendue
 
 ```
 ========================================================
@@ -223,7 +223,7 @@ Action: multiply(20, 8)
    🔧 TOOL CALLED: multiply(20, 8)
    📊 RESULT: 160
 
-... continues ...
+... continue ...
 
 --- Iteration N ---
 Thought: I have all the information
@@ -234,45 +234,45 @@ FINAL ANSWER REACHED
 ========================================================
 ```
 
-## Why This Matters
+## Pourquoi Cela Compte
 
-### Enables Complex Tasks
-- Multi-step reasoning
-- Accurate calculations
-- Self-correction
-- Transparent process
+### Permet des Tâches Complexes
+- Raisonnement multi-étapes
+- Calculs précis
+- Auto-correction
+- Processus transparent
 
-### Foundation of Modern Agents
-This pattern powers:
-- LangChain agents
+### Fondation des Agents Modernes
+Ce pattern propulse :
+- Les agents LangChain
 - AutoGPT
 - BabyAGI
-- Most production agent frameworks
+- La plupart des frameworks d'agents en production
 
-### Observable Reasoning
-Unlike "black box" LLMs, you see:
-- What the agent is thinking
-- Which tools it uses
-- Why it makes decisions
-- Where it might fail
+### Raisonnement Observable
+Contrairement aux LLMs "boîte noire", on voit :
+- Ce que l'agent pense
+- Quels outils il utilise
+- Pourquoi il prend ses décisions
+- Où il peut échouer
 
-## Best Practices
+## Bonnes Pratiques
 
-1. **Clear system prompt**: Define exact pattern
-2. **One tool per action**: Don't combine operations
-3. **Limit iterations**: Prevent infinite loops
-4. **Stream output**: Show progress
-5. **Debug thoroughly**: Use PromptDebugger
+1. **System prompt clair** : Définir le pattern exact
+2. **Un outil par action** : Ne pas combiner les opérations
+3. **Limiter les itérations** : Prévenir les boucles infinies
+4. **Streamer la sortie** : Montrer la progression
+5. **Debugger à fond** : Utiliser PromptDebugger
 
-## Comparison
+## Comparaison
 
 ```
-Simple Agent vs ReAct Agent
+Agent Simple vs Agent ReAct
 ────────────────────────────
-Single prompt/response      Multi-step iteration
-One tool call (maybe)       Multiple tool calls
-No visible reasoning        Explicit reasoning
-Works for simple tasks      Handles complex problems
+Un seul prompt/réponse         Itération multi-étapes
+Un appel d'outil (peut-être)   Appels d'outils multiples
+Pas de raisonnement visible    Raisonnement explicite
+Fonctionne pour tâches simples Gère les problèmes complexes
 ```
 
-This is the state-of-the-art pattern for building capable AI agents!
+C'est le pattern state-of-the-art pour construire des agents IA performants !
