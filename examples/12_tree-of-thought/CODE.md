@@ -125,4 +125,4 @@ Lire les fonctions dans cet ordre :
 6. `createConclusion`
 7. `runTreeOfThoughtMotivationAnalysis`
 
-Cet ordre mirror le flow runtime et rend le fichier beaucoup plus facile à comprendre.
+Cet ordre reflète le flux runtime et rend le fichier beaucoup plus facile à comprendre.

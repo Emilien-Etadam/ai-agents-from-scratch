@@ -338,4 +338,4 @@ Cela garde la latence totale basse tout en préservant le raisonnement où il co
 6. `makeDecision`
 7. `runChainOfThoughtReturnDecision`
 
-Cette séquence mirror le runtime et rend l'exemple facile à raisonner.
+Cette séquence reflète le runtime et rend l'exemple facile à raisonner.

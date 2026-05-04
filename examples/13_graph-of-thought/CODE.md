@@ -136,4 +136,4 @@ Pour que ce fichier exemple reste focalisé sur les opérations de graphe et l'o
 8. `conclude`
 9. `runGoTMotivationAnalysis`
 
-Cela vous donne le même ordre que l'exécution runtime et le chemin d'apprentissage le plus clean.
+Cela vous donne le même ordre que l'exécution runtime et le chemin d'apprentissage le plus clair.

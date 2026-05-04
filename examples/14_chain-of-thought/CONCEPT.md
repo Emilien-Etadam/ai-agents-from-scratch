@@ -117,7 +117,7 @@ La réponse est oui, mais le rôle du CoT change.
 
 #### Bottom Line
 
-Le CoT n'est pas un substitute pour un model de reasoning, et un model de reasoning n'est pas un substitute pour le CoT. Ils résolvent des problèmes différents :
+Le CoT n'est pas un substitut pour un model de reasoning, et un model de reasoning n'est pas un substitut pour le CoT. Ils résolvent des problèmes différents :
 
 - **Les models de reasoning** améliorent la qualité brute de réponse.
 - **Le Chain of Thought** transforme tout raisonnement en un workflow gouvernable.

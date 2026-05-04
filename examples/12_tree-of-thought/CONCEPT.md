@@ -1,6 +1,6 @@
 ## Tree of Thought : Analyse de motivation d'une personne
 
-**Idée :** Une personne montre un comportement puzzle. L'agent explore multiple explications psychologiques en parallel, les score, et expand uniquement l'hypothèse la plus forte en analyse finale.
+**Idée :** Une personne montre un comportement puzzle. L'agent explore multiple explications psychologiques en parallèle, les score, et expand uniquement l'hypothèse la plus forte en analyse finale.
 
 ---
 
@@ -66,7 +66,7 @@ On reçoit une alerte production : la latence API est passée de 200 ms à 2 s a
 - **Prune :** Choisir la cause la plus confiante (par exemple cache collapse).
 - **Act :** Exécuter un chemin de remediation en premier (par exemple cache warmup d'urgence + rollback TTL).
 
-Pourquoi le ToT fit : la réponse à incident nécessite souvent un chemin de décision rapide et auditable au lieu de maintenir de nombreux tracks de remediation en parallel.
+Pourquoi le ToT fit : la réponse à incident nécessite souvent un chemin de décision rapide et auditable au lieu de maintenir de nombreux tracks de remediation en parallèle.
 
 #### Mental model d'un Développeur
 

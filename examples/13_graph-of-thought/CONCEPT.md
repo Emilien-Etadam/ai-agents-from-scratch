@@ -104,7 +104,7 @@ On conçoit un agent de planification de qualité recherche pour des tâches com
 - **Aggregate :** Fusionner les sous-plans complémentaires en une stratégie robuste.
 - **Conclude :** Exécuter avec un contexte plus riche et garder des artefacts de raisonnement traçables.
 
-Pourquoi le GoT fit : les agents gérant des tâches ambiguës et à haut enjeu bénéficient de préserver et recombinaison le raisonnement au lieu de pruner tôt.
+Pourquoi le GoT fit : les agents gérant des tâches ambiguës et à haut enjeu bénéficient de préserver et recombiner le raisonnement au lieu de pruner tôt.
 
 Le GoT est le plus fort quand :
 
